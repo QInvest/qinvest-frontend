@@ -14,6 +14,7 @@ import CreditRequest from "./pages/CreditRequest";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import MeusInvestimentos from "./pages/MeusInvestimentos";
+import MinhaEmpresa from "./pages/MinhaEmpresa";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/company/:id" element={<CompanyDetail />} />
           <Route path="/wallet" element={<Wallet />} />
           <Route path="/credit-request" element={<CreditRequest />} />
+          <Route path="/minha-empresa" element={<MinhaEmpresa />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/meus-investimentos" element={<MeusInvestimentos />} />
           <Route path="/investment/:id" element={<MeusInvestimentos />} />

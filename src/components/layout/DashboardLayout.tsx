@@ -8,7 +8,7 @@ import {
   Bell,
   Settings,
   CreditCard,
-  PlusCircle,
+  Building2,
   Eye,
   AlertCircle
 } from "lucide-react";
@@ -49,10 +49,10 @@ export function DashboardLayout({ children, title, showBalance = true }: Dashboa
       active: location.pathname === "/wallet"
     },
     {
-      to: "/credit-request",
-      icon: PlusCircle,
-      label: "Solicitar Crédito",
-      active: location.pathname === "/credit-request"
+      to: "/minha-empresa",
+      icon: Building2,
+      label: "Minha Empresa",
+      active: location.pathname === "/minha-empresa"
     }
   ];
 
