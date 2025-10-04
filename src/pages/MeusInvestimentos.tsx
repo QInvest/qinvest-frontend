@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { ArrowLeft, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CardInvestimento } from "@/components/investment/CardInvestimento";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { mockInvestimentos } from "@/data/mockData";
-import { Logo } from "@/components/ui/logo";
 import { useToast } from "@/hooks/use-toast";
+import { TrendingUp } from "lucide-react";
 
 export default function MeusInvestimentos() {
   const { toast } = useToast();
@@ -34,27 +33,7 @@ export default function MeusInvestimentos() {
     : 0;
 
   return (
-    <div className="min-h-screen bg-muted/30 font-inter">
-      {/* Header */}
-      <header className="bg-white border-b border-border sticky top-0 z-40">
-        <div className="px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Link to="/dashboard">
-              <Logo />
-            </Link>
-            <div className="hidden md:block h-6 w-px bg-border" />
-            <h1 className="hidden md:block text-xl font-semibold">Meus Investimentos</h1>
-          </div>
-          
-          <Button variant="ghost" asChild>
-            <Link to="/dashboard">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar
-            </Link>
-          </Button>
-        </div>
-      </header>
-
+    <DashboardLayout title="Meus Investimentos">
       <div className="p-6">
         <div className="max-w-7xl mx-auto space-y-6">
           {/* Summary */}
@@ -175,6 +154,6 @@ export default function MeusInvestimentos() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </DashboardLayout>
   );
 }

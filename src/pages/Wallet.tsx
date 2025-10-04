@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Header } from "@/components/layout/header";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useToast } from "@/hooks/use-toast";
 
 const Wallet = () => {
@@ -65,140 +65,137 @@ const Wallet = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Carteira Virtual</h1>
-          <p className="text-muted-foreground">Gerencie seus recursos e acompanhe suas transações</p>
-        </div>
+    <DashboardLayout title="Carteira Virtual">
+      <div className="p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold">Carteira Virtual</h1>
+            <p className="text-muted-foreground">Gerencie seus recursos e acompanhe suas transações</p>
+          </div>
 
-        {/* Balance Card */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CreditCard className="h-6 w-6" />
-              Saldo Disponível
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-3xl font-bold text-primary">
-                  R$ {balance.toLocaleString()}
-                </p>
-                <p className="text-sm text-muted-foreground">Disponível para investimento</p>
-              </div>
-              <div className="flex gap-2">
-                <Dialog open={showDepositDialog} onOpenChange={setShowDepositDialog}>
-                  <DialogTrigger asChild>
-                    <Button>
-                      <Upload className="mr-2 h-4 w-4" />
-                      Depositar
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Depositar Fundos</DialogTitle>
-                      <DialogDescription>
-                        Adicione recursos à sua carteira virtual
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="amount">Valor (R$)</Label>
-                        <Input id="amount" placeholder="0,00" />
-                      </div>
-                      <Button onClick={handleDeposit} className="w-full">
-                        Solicitar Depósito
+          {/* Balance Card */}
+          <Card className="mb-8 shadow-card border-0">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5" />
+                Saldo Disponível
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-4xl font-bold text-success">
+                    R$ {balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </p>
+                  <p className="text-muted-foreground mt-1">Disponível para investimento</p>
+                </div>
+                <div className="flex gap-2">
+                  <Dialog open={showDepositDialog} onOpenChange={setShowDepositDialog}>
+                    <DialogTrigger asChild>
+                      <Button className="gradient-primary text-white">
+                        <Upload className="h-4 w-4 mr-2" />
+                        Depositar
                       </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-
-                <Dialog open={showWithdrawDialog} onOpenChange={setShowWithdrawDialog}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline">
-                      <Download className="mr-2 h-4 w-4" />
-                      Sacar
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Sacar Fundos</DialogTitle>
-                      <DialogDescription>
-                        Transfira recursos para sua conta bancária
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="withdraw-amount">Valor (R$)</Label>
-                        <Input id="withdraw-amount" placeholder="0,00" />
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Depositar Fundos</DialogTitle>
+                        <DialogDescription>
+                          Adicione recursos à sua carteira virtual
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="amount">Valor (R$)</Label>
+                          <Input id="amount" placeholder="0,00" type="number" />
+                        </div>
+                        <Button onClick={handleDeposit} className="w-full">
+                          Solicitar Depósito
+                        </Button>
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        Saldo disponível: R$ {balance.toLocaleString()}
-                      </p>
-                      <Button onClick={handleWithdraw} className="w-full">
-                        Solicitar Saque
+                    </DialogContent>
+                  </Dialog>
+
+                  <Dialog open={showWithdrawDialog} onOpenChange={setShowWithdrawDialog}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline">
+                        <Download className="h-4 w-4 mr-2" />
+                        Sacar
                       </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Transaction History */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <History className="h-6 w-6" />
-              Histórico de Transações
-            </CardTitle>
-            <CardDescription>
-              Acompanhe todas as movimentações da sua carteira
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Descrição</TableHead>
-                  <TableHead>Data</TableHead>
-                  <TableHead className="text-right">Valor</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {transactions.map((transaction) => (
-                  <TableRow key={transaction.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        {getTransactionIcon(transaction.type)}
-                        <span className="capitalize">{transaction.type}</span>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Sacar Fundos</DialogTitle>
+                        <DialogDescription>
+                          Transfira recursos para sua conta bancária
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="withdraw-amount">Valor (R$)</Label>
+                          <Input id="withdraw-amount" placeholder="0,00" type="number" />
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Saldo disponível: R$ {balance.toLocaleString('pt-BR')}
+                        </p>
+                        <Button onClick={handleWithdraw} className="w-full">
+                          Solicitar Saque
+                        </Button>
                       </div>
-                    </TableCell>
-                    <TableCell>{transaction.description}</TableCell>
-                    <TableCell>{new Date(transaction.date).toLocaleDateString("pt-BR")}</TableCell>
-                    <TableCell className={`text-right font-medium ${getTransactionColor(transaction.type)}`}>
-                      {transaction.amount > 0 ? "+" : ""}R$ {Math.abs(transaction.amount).toLocaleString()}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="default">
-                        Concluído
-                      </Badge>
-                    </TableCell>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Transactions History */}
+          <Card className="shadow-card border-0">
+            <CardHeader>
+              <CardTitle>Histórico de Transações</CardTitle>
+              <CardDescription>
+                Acompanhe todas as suas movimentações financeiras
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Tipo</TableHead>
+                    <TableHead>Descrição</TableHead>
+                    <TableHead>Data</TableHead>
+                    <TableHead>Valor</TableHead>
+                    <TableHead>Status</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      </main>
-    </div>
+                </TableHeader>
+                <TableBody>
+                  {transactions.map((transaction) => (
+                    <TableRow key={transaction.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {getTransactionIcon(transaction.type)}
+                          <span className="capitalize">{transaction.type}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-medium">{transaction.description}</TableCell>
+                      <TableCell>{new Date(transaction.date).toLocaleDateString('pt-BR')}</TableCell>
+                      <TableCell className={`font-medium ${getTransactionColor(transaction.type)}`}>
+                        {transaction.amount > 0 ? '+' : ''}R$ {Math.abs(transaction.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary">
+                          Concluído
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

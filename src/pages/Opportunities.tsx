@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SearchBar } from "@/components/investment/SearchBar";
 import { FiltersPanel } from "@/components/investment/FiltersPanel";
 import { CardOportunidade } from "@/components/investment/CardOportunidade";
-import { Logo } from "@/components/ui/logo";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { mockOportunidades } from "@/data/mockData";
 
 export default function Opportunities() {
@@ -26,25 +25,7 @@ export default function Opportunities() {
   });
 
   return (
-    <div className="min-h-screen bg-muted/30 font-inter">
-      {/* Header */}
-      <header className="bg-white border-b border-border sticky top-0 z-40">
-        <div className="px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Link to="/dashboard">
-              <Logo />
-            </Link>
-            <div className="hidden md:block h-6 w-px bg-border" />
-            <h1 className="hidden md:block text-xl font-semibold">Oportunidades de Investimento</h1>
-          </div>
-          
-          <div className="text-right hidden sm:block">
-            <div className="text-sm text-muted-foreground">Saldo disponível</div>
-            <div className="text-2xl font-bold text-success">R$ 25.347,89</div>
-          </div>
-        </div>
-      </header>
-
+    <DashboardLayout title="Oportunidades de Investimento">
       <div className="p-6">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -99,20 +80,27 @@ export default function Opportunities() {
                 </div>
               ) : (
                 <div className="text-center py-12">
-                  <p className="text-muted-foreground text-lg mb-4">
-                    Nenhuma oportunidade encontrada com esses filtros.
+                  <div className="text-muted-foreground mb-4">
+                    <svg
+                      className="mx-auto h-12 w-12 text-muted-foreground/50"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-medium text-muted-foreground mb-2">
+                    Nenhuma oportunidade encontrada
+                  </h3>
+                  <p className="text-muted-foreground">
+                    Tente ajustar os filtros para encontrar mais oportunidades.
                   </p>
-                  <Button 
-                    variant="outline"
-                    onClick={() => {
-                      setSearchTerm("");
-                      setSelectedRiscos([]);
-                      setTempoRange([6, 36]);
-                      setCaptacaoRange([0, 100]);
-                    }}
-                  >
-                    Limpar Filtros
-                  </Button>
                 </div>
               )}
 
@@ -128,6 +116,6 @@ export default function Opportunities() {
           </div>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }

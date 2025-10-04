@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Header } from "@/components/layout/header";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useToast } from "@/hooks/use-toast";
 
 const CreditRequest = () => {
@@ -51,10 +51,8 @@ const CreditRequest = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main className="container mx-auto px-4 py-8">
+    <DashboardLayout title="Solicitar Crédito">
+      <div className="p-6">
         <div className="max-w-2xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold">Solicitar Crédito</h1>
@@ -63,97 +61,96 @@ const CreditRequest = () => {
             </p>
           </div>
 
-          <Card>
+          <Card className="shadow-card border-0">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Building2 className="h-6 w-6" />
+                <Building2 className="h-5 w-5" />
                 Informações da Empresa
               </CardTitle>
               <CardDescription>
-                Forneça os dados da sua empresa para análise de crédito
+                Dados necessários para análise de crédito
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="cnpj">CNPJ</Label>
-                    <Input
-                      id="cnpj"
-                      placeholder="00.000.000/0001-00"
-                      value={formData.cnpj}
-                      onChange={(e) => handleInputChange("cnpj", e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="companyName">Razão Social</Label>
-                    <Input
-                      id="companyName"
-                      placeholder="Nome da empresa"
-                      value={formData.companyName}
-                      onChange={(e) => handleInputChange("companyName", e.target.value)}
-                      required
-                    />
-                  </div>
+                {/* CNPJ */}
+                <div className="space-y-2">
+                  <Label htmlFor="cnpj">CNPJ *</Label>
+                  <Input
+                    id="cnpj"
+                    placeholder="00.000.000/0000-00"
+                    value={formData.cnpj}
+                    onChange={(e) => handleInputChange("cnpj", e.target.value)}
+                    required
+                  />
                 </div>
 
-                <div>
-                  <Label htmlFor="sector">Setor de Atuação</Label>
-                  <Select onValueChange={(value) => handleInputChange("sector", value)}>
+                {/* Company Name */}
+                <div className="space-y-2">
+                  <Label htmlFor="companyName">Nome da Empresa *</Label>
+                  <Input
+                    id="companyName"
+                    placeholder="Nome da sua empresa"
+                    value={formData.companyName}
+                    onChange={(e) => handleInputChange("companyName", e.target.value)}
+                    required
+                  />
+                </div>
+
+                {/* Sector */}
+                <div className="space-y-2">
+                  <Label htmlFor="sector">Setor de Atuação *</Label>
+                  <Select
+                    value={formData.sector}
+                    onValueChange={(value) => handleInputChange("sector", value)}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione o setor" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="tecnologia">Tecnologia</SelectItem>
-                      <SelectItem value="comercio">Comércio</SelectItem>
-                      <SelectItem value="servicos">Serviços</SelectItem>
-                      <SelectItem value="industria">Indústria</SelectItem>
-                      <SelectItem value="agricultura">Agricultura</SelectItem>
-                      <SelectItem value="construcao">Construção</SelectItem>
-                      <SelectItem value="alimentacao">Alimentação</SelectItem>
-                      <SelectItem value="saude">Saúde</SelectItem>
-                      <SelectItem value="educacao">Educação</SelectItem>
-                      <SelectItem value="outros">Outros</SelectItem>
+                      <SelectItem value="technology">Tecnologia</SelectItem>
+                      <SelectItem value="agriculture">Agronegócio</SelectItem>
+                      <SelectItem value="retail">Varejo</SelectItem>
+                      <SelectItem value="manufacturing">Indústria</SelectItem>
+                      <SelectItem value="services">Serviços</SelectItem>
+                      <SelectItem value="healthcare">Saúde</SelectItem>
+                      <SelectItem value="education">Educação</SelectItem>
+                      <SelectItem value="other">Outro</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="revenue" className="flex items-center gap-2">
-                      <DollarSign className="h-4 w-4" />
-                      Faturamento Anual (R$)
-                    </Label>
-                    <Input
-                      id="revenue"
-                      placeholder="0,00"
-                      value={formData.revenue}
-                      onChange={(e) => handleInputChange("revenue", e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="requestedAmount" className="flex items-center gap-2">
-                      <DollarSign className="h-4 w-4" />
-                      Valor Solicitado (R$)
-                    </Label>
-                    <Input
-                      id="requestedAmount"
-                      placeholder="0,00"
-                      value={formData.requestedAmount}
-                      onChange={(e) => handleInputChange("requestedAmount", e.target.value)}
-                      required
-                    />
-                  </div>
+                {/* Revenue */}
+                <div className="space-y-2">
+                  <Label htmlFor="revenue">Faturamento Mensal *</Label>
+                  <Input
+                    id="revenue"
+                    placeholder="R$ 0,00"
+                    value={formData.revenue}
+                    onChange={(e) => handleInputChange("revenue", e.target.value)}
+                    required
+                  />
                 </div>
 
-                <div>
-                  <Label htmlFor="term" className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    Prazo Desejado
-                  </Label>
-                  <Select onValueChange={(value) => handleInputChange("term", value)}>
+                {/* Requested Amount */}
+                <div className="space-y-2">
+                  <Label htmlFor="requestedAmount">Valor Solicitado *</Label>
+                  <Input
+                    id="requestedAmount"
+                    placeholder="R$ 0,00"
+                    value={formData.requestedAmount}
+                    onChange={(e) => handleInputChange("requestedAmount", e.target.value)}
+                    required
+                  />
+                </div>
+
+                {/* Term */}
+                <div className="space-y-2">
+                  <Label htmlFor="term">Prazo Desejado *</Label>
+                  <Select
+                    value={formData.term}
+                    onValueChange={(value) => handleInputChange("term", value)}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione o prazo" />
                     </SelectTrigger>
@@ -167,14 +164,12 @@ const CreditRequest = () => {
                   </Select>
                 </div>
 
-                <div>
-                  <Label htmlFor="purpose" className="flex items-center gap-2">
-                    <FileText className="h-4 w-4" />
-                    Finalidade do Crédito
-                  </Label>
+                {/* Purpose */}
+                <div className="space-y-2">
+                  <Label htmlFor="purpose">Finalidade do Crédito *</Label>
                   <Textarea
                     id="purpose"
-                    placeholder="Descreva como pretende utilizar o crédito solicitado..."
+                    placeholder="Descreva para que será utilizado o crédito..."
                     value={formData.purpose}
                     onChange={(e) => handleInputChange("purpose", e.target.value)}
                     rows={4}
@@ -182,39 +177,41 @@ const CreditRequest = () => {
                   />
                 </div>
 
-                <div className="pt-6 border-t">
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full"
-                    size="lg"
-                  >
-                    {isSubmitting ? "Enviando Solicitação..." : "Enviar Solicitação"}
-                  </Button>
-                </div>
+                {/* Submit Button */}
+                <Button
+                  type="submit"
+                  className="w-full gradient-primary text-white"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Enviando...
+                    </>
+                  ) : (
+                    <>
+                      <FileText className="h-4 w-4 mr-2" />
+                      Enviar Solicitação
+                    </>
+                  )}
+                </Button>
               </form>
             </CardContent>
           </Card>
 
+          {/* Success Dialog */}
           <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Solicitação Enviada com Sucesso!</DialogTitle>
-                <DialogDescription className="space-y-4">
-                  <p>
-                    Sua solicitação de crédito foi recebida e está sendo analisada por nossa equipe.
-                  </p>
-                  <div className="bg-green-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-green-800">Próximos passos:</h4>
-                    <ul className="text-green-700 text-sm space-y-1">
-                      <li>• Análise inicial em até 24 horas</li>
-                      <li>• Solicitação de documentos complementares</li>
-                      <li>• Resposta final em até 48 horas</li>
-                    </ul>
+                <DialogTitle className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-success/20 rounded-full flex items-center justify-center">
+                    <div className="w-4 h-4 bg-success rounded-full"></div>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    Você receberá atualizações por email sobre o status da sua solicitação.
-                  </p>
+                  Solicitação Enviada!
+                </DialogTitle>
+                <DialogDescription>
+                  Sua solicitação de crédito foi enviada com sucesso. Nossa equipe analisará 
+                  os dados e entrará em contato em até 48 horas com o resultado.
                 </DialogDescription>
               </DialogHeader>
               <Button onClick={handleCloseSuccess} className="w-full">
@@ -223,8 +220,8 @@ const CreditRequest = () => {
             </DialogContent>
           </Dialog>
         </div>
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 
