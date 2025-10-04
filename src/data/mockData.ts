@@ -4,7 +4,7 @@ export interface Oportunidade {
   id: string;
   foto: string;
   nome: string;
-  risco: 'baixo' | 'medio' | 'alto';
+  risco: 'A' | 'B' | 'C' | 'D';
   retornoBruto: number;
   prazo: number;
   percentualCaptacao: number;
@@ -46,7 +46,7 @@ export interface Investimento {
   empresaId: string;
   foto: string;
   nome: string;
-  risco: 'baixo' | 'medio' | 'alto';
+  risco: 'A' | 'B' | 'C' | 'D';
   numCotas: number;
   valorInvestido: number;
   valorRecebido: number;
@@ -133,7 +133,7 @@ export const mockOportunidades: Oportunidade[] = [
     id: "opp-001",
     foto: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=300&fit=crop",
     nome: "TechCorp S.A.",
-    risco: "baixo",
+    risco: "A",
     retornoBruto: 12.0,
     prazo: 12,
     percentualCaptacao: 65,
@@ -149,7 +149,7 @@ export const mockOportunidades: Oportunidade[] = [
     id: "opp-002",
     foto: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop",
     nome: "Food Express S.A.",
-    risco: "medio",
+    risco: "B",
     retornoBruto: 15.0,
     prazo: 24,
     percentualCaptacao: 40,
@@ -165,7 +165,7 @@ export const mockOportunidades: Oportunidade[] = [
     id: "opp-003",
     foto: "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?w=400&h=300&fit=crop",
     nome: "LogiX Transportes",
-    risco: "baixo",
+    risco: "A",
     retornoBruto: 10.0,
     prazo: 6,
     percentualCaptacao: 90,
@@ -181,7 +181,7 @@ export const mockOportunidades: Oportunidade[] = [
     id: "opp-004",
     foto: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop",
     nome: "RetailY Varejo",
-    risco: "alto",
+    risco: "D",
     retornoBruto: 18.0,
     prazo: 36,
     percentualCaptacao: 20,
@@ -197,7 +197,7 @@ export const mockOportunidades: Oportunidade[] = [
     id: "opp-005",
     foto: "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=400&h=300&fit=crop",
     nome: "EcoTech Energia",
-    risco: "baixo",
+    risco: "A",
     retornoBruto: 11.5,
     prazo: 18,
     percentualCaptacao: 75,
@@ -217,7 +217,7 @@ export const mockInvestimentos: Investimento[] = [
     empresaId: "opp-001",
     foto: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=300&fit=crop",
     nome: "TechCorp S.A.",
-    risco: "baixo",
+    risco: "A",
     numCotas: 10,
     valorInvestido: 5000.0,
     valorRecebido: 2333.5,
@@ -268,7 +268,7 @@ export const mockInvestimentos: Investimento[] = [
     empresaId: "opp-002",
     foto: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop",
     nome: "Food Express S.A.",
-    risco: "medio",
+    risco: "C",
     numCotas: 5,
     valorInvestido: 5000.0,
     valorRecebido: 5750.0,

@@ -33,11 +33,12 @@ const CompanyDetail = () => {
     }, 2000);
   };
 
-  const getRiscoBadgeClass = (risco: string) => {
+  const getRiscoBadgeClass = (risco: 'A' | 'B' | 'C' | 'D') => {
     switch (risco) {
-      case 'baixo': return "bg-primary/10 text-primary";
-      case 'medio': return "bg-warning/10 text-warning";
-      case 'alto': return "bg-destructive/10 text-destructive";
+      case 'A': return "bg-success/10 text-success";
+      case 'B': return "bg-primary/10 text-primary";
+      case 'C': return "bg-warning/10 text-warning";
+      case 'D': return "bg-destructive/10 text-destructive";
       default: return "";
     }
   };
@@ -80,7 +81,7 @@ const CompanyDetail = () => {
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Badge className={getRiscoBadgeClass(empresa.risco)}>
-                                {empresa.risco === 'baixo' ? '🔵 Baixo' : empresa.risco === 'medio' ? '🟡 Médio' : '🔴 Alto'}
+                                {empresa.risco === 'A' ? '🟢 Risco A' : empresa.risco === 'B' ? '🔵 Risco B' : empresa.risco === 'C' ? '🟡 Risco C' : '🔴 Risco D'}
                               </Badge>
                             </TooltipTrigger>
                             <TooltipContent className="max-w-xs">

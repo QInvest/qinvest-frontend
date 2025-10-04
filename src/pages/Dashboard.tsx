@@ -166,11 +166,12 @@ export default function Dashboard() {
                         <td className="py-3 font-medium">{investment.nome}</td>
                         <td className="py-3">
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            investment.risco === "baixo" ? "bg-primary/10 text-primary" :
-                            investment.risco === "medio" ? "bg-warning/10 text-warning" :
+                            investment.risco === "A" ? "bg-success/10 text-success" :
+                            investment.risco === "B" ? "bg-primary/10 text-primary" :
+                            investment.risco === "C" ? "bg-warning/10 text-warning" :
                             "bg-destructive/10 text-destructive"
                           }`}>
-                            {investment.risco === "baixo" ? "Baixo" : investment.risco === "medio" ? "Médio" : "Alto"}
+                            Risco {investment.risco}
                           </span>
                         </td>
                         <td className="py-3">{investment.numCotas}</td>

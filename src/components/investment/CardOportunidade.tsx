@@ -11,25 +11,42 @@ interface CardOportunidadeProps {
   variant?: 'compact' | 'expanded';
 }
 
-const getRiscoBadgeClass = (risco: 'baixo' | 'medio' | 'alto') => {
+const getRiscoBadgeClass = (risco: 'A' | 'B' | 'C' | 'D') => {
   switch (risco) {
-    case 'baixo':
+    case 'A':
+      return "bg-success/10 text-success hover:bg-success/20";
+    case 'B':
       return "bg-primary/10 text-primary hover:bg-primary/20";
-    case 'medio':
+    case 'C':
       return "bg-warning/10 text-warning hover:bg-warning/20";
-    case 'alto':
+    case 'D':
       return "bg-destructive/10 text-destructive hover:bg-destructive/20";
   }
 };
 
-const getRiscoTooltip = (risco: 'baixo' | 'medio' | 'alto') => {
+const getRiscoTooltip = (risco: 'A' | 'B' | 'C' | 'D') => {
   switch (risco) {
-    case 'baixo':
-      return "Empresa com histórico sólido, garantias reais e baixo índice de inadimplência.";
-    case 'medio':
+    case 'A':
+      return "Empresa com histórico sólido, garantias reais e baixo índice de inadimplência. Risco muito baixo.";
+    case 'B':
+      return "Empresa com boa estabilidade financeira e garantias adequadas. Risco baixo.";
+    case 'C':
       return "Empresa em crescimento com garantias parciais. Risco moderado de inadimplência.";
-    case 'alto':
+    case 'D':
       return "Empresa em estágio inicial ou setor volátil. Maior potencial de retorno, mas com risco elevado.";
+  }
+};
+
+const getRiscoIcon = (risco: 'A' | 'B' | 'C' | 'D') => {
+  switch (risco) {
+    case 'A':
+      return "🟢";
+    case 'B':
+      return "🔵";
+    case 'C':
+      return "🟡";
+    case 'D':
+      return "🔴";
   }
 };
 
@@ -66,7 +83,7 @@ export function CardOportunidade({ oportunidade, variant = 'expanded' }: CardOpo
             <Tooltip>
               <TooltipTrigger asChild>
                 <Badge className={getRiscoBadgeClass(oportunidade.risco)}>
-                  🔵 {oportunidade.risco === 'baixo' ? 'Baixo' : oportunidade.risco === 'medio' ? 'Médio' : 'Alto'}
+                  {getRiscoIcon(oportunidade.risco)} Risco {oportunidade.risco}
                 </Badge>
               </TooltipTrigger>
               <TooltipContent>
