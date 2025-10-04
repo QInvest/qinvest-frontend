@@ -1,73 +1,94 @@
-# Welcome to your Lovable project
+# Qinvest - Plataforma de Investimentos P2P
 
-## Project info
+Uma plataforma moderna de investimentos peer-to-peer que conecta empresas que precisam de crédito com investidores que buscam rentabilidade.
 
-**URL**: https://lovable.dev/projects/79947455-029e-46ff-be6b-94c7e5c3bf78
+## 🚀 Tecnologias
 
-## How can I edit this code?
+- **React** - Biblioteca para interfaces de usuário
+- **TypeScript** - Superset tipado do JavaScript
+- **Tailwind CSS** - Framework CSS utilitário
+- **shadcn/ui** - Componentes de interface modernos
+- **React Router** - Roteamento declarativo
+- **Lucide React** - Ícones SVG otimizados
 
-There are several ways of editing your application.
+## 🛠️ Desenvolvimento
 
-**Use Lovable**
+### Pré-requisitos
+- Node.js 18+ 
+- npm ou yarn
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/79947455-029e-46ff-be6b-94c7e5c3bf78) and start prompting.
+### Instalação
+```bash
+npm install
+```
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### Executar em desenvolvimento
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Build para produção
+```bash
+npm run build
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Lint e formatação
+```bash
+npm run lint
+npm run format
+```
 
-**Use GitHub Codespaces**
+## 📁 Estrutura do Projeto
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```
+src/
+├── components/          # Componentes reutilizáveis
+│   ├── ui/             # Componentes base (shadcn/ui)
+│   ├── layout/         # Componentes de layout
+│   └── investment/     # Componentes específicos de investimento
+├── pages/              # Páginas da aplicação
+├── hooks/              # Custom hooks
+├── lib/                # Utilitários e configurações
+└── data/               # Dados mock e constantes
+```
 
-## What technologies are used for this project?
+## 🎯 Funcionalidades
 
-This project is built with:
+- **Dashboard** - Visão geral dos investimentos
+- **Oportunidades** - Catálogo de investimentos disponíveis
+- **Meus Investimentos** - Acompanhamento de investimentos ativos
+- **Carteira Virtual** - Gestão de saldo e transações
+- **Minha Empresa** - Solicitações de crédito
+- **Configurações** - Preferências do usuário
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🎨 Design System
 
-## How can I deploy this project?
+O projeto utiliza um design system consistente baseado em:
+- **Cores**: Paleta personalizada com suporte a tema claro/escuro
+- **Tipografia**: Inter como fonte principal
+- **Componentes**: Biblioteca shadcn/ui customizada
+- **Layout**: Grid responsivo com breakpoints otimizados
 
-Simply open [Lovable](https://lovable.dev/projects/79947455-029e-46ff-be6b-94c7e5c3bf78) and click on Share -> Publish.
+## 📱 Responsividade
 
-## Can I connect a custom domain to my Lovable project?
+A aplicação é totalmente responsiva, funcionando perfeitamente em:
+- Desktop (1024px+)
+- Tablet (768px - 1023px)
+- Mobile (até 767px)
 
-Yes, you can!
+## 🔧 Configuração
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Variáveis de Ambiente
+Crie um arquivo `.env.local` na raiz do projeto:
+```env
+VITE_API_URL=http://localhost:3000
+```
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+### Personalização
+- **Cores**: Edite `tailwind.config.ts`
+- **Componentes**: Modifique em `src/components/ui/`
+- **Dados**: Atualize em `src/data/mockData.ts`
+
+## 📄 Licença
+
+Este projeto é propriedade da Qinvest. Todos os direitos reservados.
