@@ -21,7 +21,7 @@ interface Carteira {
 }
 
 // Transform API data to match your frontend interface
-const transformWalletData = (walletData: WalletData, transactions: TransactionData[]): Carteira => {
+const transformWalletData = async (walletData: WalletData, transactions: TransactionData[]): Promise<Carteira> => {
   const extrato: Transacao[] = transactions.map(transaction => ({
     id: transaction.transaction_id,
     data: transaction.created_at,
@@ -39,6 +39,17 @@ const transformWalletData = (walletData: WalletData, transactions: TransactionDa
   const totalWithdrawals = transactions
     .filter(t => t.type === 'debit')
     .reduce((sum, t) => sum + t.amount, 0);
+
+  // Get real invested amount from user investments
+  let patrimonioInvestido = 0;
+  try {
+    const portfolio = await apiService.getUserPortfolio();
+    patrimonioInvestido = portfolio.total_invested / 100; // Convert from cents to reais
+  } catch (error) {
+    console.error('Error fetching user portfolio for patrimonio calculation:', error);
+    // Fallback to transaction-based calculation
+    patrimonioInvestido = totalDeposits / 100;
+  }
 
   // Generate real portfolio chart data based on transaction history
   const generatePortfolioChart = (): Array<{ mes: string; valor: number }> => {
@@ -94,7 +105,7 @@ const transformWalletData = (walletData: WalletData, transactions: TransactionDa
 
   return {
     saldoDisponivel: walletData.balance / 100, // Convert from cents
-    patrimonioInvestido: totalDeposits / 100, // Convert from cents
+    patrimonioInvestido, // Real invested amount from portfolio
     lucroHistorico: (totalDeposits - totalWithdrawals - walletData.balance) / 100,
     extrato,
     graficoPatrimonio: generatePortfolioChart()
@@ -117,7 +128,7 @@ export const useWallet = () => {
         apiService.fetchTransactions()
       ]);
 
-      const transformedData = transformWalletData(rawWalletData, transactions);
+      const transformedData = await transformWalletData(rawWalletData, transactions);
       setCarteira(transformedData);
       setWalletData(rawWalletData);
     } catch (err) {

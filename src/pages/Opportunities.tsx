@@ -85,14 +85,23 @@ export default function Opportunities() {
 
   // Filter opportunities
   const filteredOportunidades = oportunidadesData.filter(opp => {
-    const matchesSearch = opp.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         opp.setor.toLowerCase().includes(searchTerm.toLowerCase());
+    const searchLower = searchTerm.toLowerCase();
+    const matchesSearch = opp.nome.toLowerCase().includes(searchLower) ||
+                         opp.setor.toLowerCase().includes(searchLower) ||
+                         opp.cnpj.toLowerCase().includes(searchLower);
+    
+    // Search in description/purpose from original opportunity data
+    const originalOpportunity = opportunities.find(o => o.opportunity_id === opp.id);
+    const matchesDescription = originalOpportunity ? 
+      (originalOpportunity.purpose?.toLowerCase().includes(searchLower) ||
+       originalOpportunity.description?.toLowerCase().includes(searchLower)) : false;
+    
     const matchesRisco = selectedRiscos.length === 0 || selectedRiscos.includes(opp.risco);
     const matchesTempo = opp.prazo >= tempoRange[0] && opp.prazo <= tempoRange[1];
     const matchesCaptacao = opp.percentualCaptacao >= captacaoRange[0] && 
                            opp.percentualCaptacao <= captacaoRange[1];
 
-    return matchesSearch && matchesRisco && matchesTempo && matchesCaptacao;
+    return (matchesSearch || matchesDescription) && matchesRisco && matchesTempo && matchesCaptacao;
   });
 
   if (loading) {
@@ -140,7 +149,7 @@ export default function Opportunities() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1">
                   <SearchBar
-                    placeholder="Buscar por nome da empresa..."
+                    placeholder="Buscar por nome, setor, CNPJ ou descrição..."
                     value={searchTerm}
                     onChange={setSearchTerm}
                   />

@@ -27,6 +27,8 @@ const MinhaEmpresa = () => {
   const [error, setError] = useState<string | null>(null);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showNewRequestDialog, setShowNewRequestDialog] = useState(false);
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [selectedCaptation, setSelectedCaptation] = useState<Captation | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch user's company
@@ -113,6 +115,11 @@ const MinhaEmpresa = () => {
       title: "Empresa criada!",
       description: `${newCompany.company_name} foi criada com sucesso.`,
     });
+  };
+
+  const handleViewDetails = (captation: Captation) => {
+    setSelectedCaptation(captation);
+    setShowDetailsDialog(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -430,28 +437,69 @@ const MinhaEmpresa = () => {
                         
                         {/* Status Specific Information */}
                         {captation.status === 'approved' && (
-                          <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                            <p className="text-sm text-green-800 font-medium mb-1">✅ Solicitação Aprovada!</p>
-                            <p className="text-xs text-green-700">
-                              Sua captação foi automaticamente convertida em uma oportunidade de investimento. 
-                              Verifique a aba "Oportunidades Criadas" para acompanhar os investimentos.
-                            </p>
+                          <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-3">
+                            <div className="flex items-center gap-2">
+                              <CheckCircle className="h-5 w-5 text-green-600" />
+                              <p className="text-sm text-green-800 font-medium">✅ Solicitação Aprovada e Convertida</p>
+                            </div>
+                            <div className="text-xs text-green-700 space-y-2">
+                              <p className="font-medium">📊 Status da Oportunidade:</p>
+                              <div className="grid grid-cols-2 gap-2 text-xs">
+                                <div>• Disponível para investimento</div>
+                                <div>• Listada no marketplace</div>
+                                <div>• Taxa de retorno: {captation.expected_return}% a.a.</div>
+                                <div>• Prazo: {captation.duration_months} meses</div>
+                              </div>
+                              <p className="pt-2 border-t border-green-200">
+                                💡 <strong>Próximos passos:</strong> Verifique a aba "Oportunidades Criadas" para 
+                                acompanhar investimentos em tempo real e gerir os pagamentos quando os fundos 
+                                forem completamente captados.
+                              </p>
+                            </div>
                           </div>
                         )}
                         
                         {captation.status === 'pending' && (
-                          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
-                            <p className="text-sm text-orange-800 font-medium mb-1">⏳ Aguardando Aprovação</p>
-                            <p className="text-xs text-orange-700">
-                              Sua solicitação está sendo analisada. Com o sistema de auto-aprovação ativo, 
-                              ela será aprovada automaticamente em breve.
-                            </p>
+                          <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 space-y-2">
+                            <div className="flex items-center gap-2">
+                              <Clock className="h-5 w-5 text-orange-600" />
+                              <p className="text-sm text-orange-800 font-medium">⏳ Processando Aprovação</p>
+                            </div>
+                            <div className="text-xs text-orange-700 space-y-2">
+                              <p>Sua solicitação está sendo processada pelo sistema de auto-aprovação.</p>
+                              <div className="bg-orange-100 rounded p-2">
+                                <p className="font-medium">📋 Critérios verificados:</p>
+                                <div className="mt-1 space-y-1">
+                                  <div>✓ Dados da empresa validados</div>
+                                  <div>✓ Valor dentro dos limites</div>
+                                  <div>✓ Documentação completa</div>
+                                  <div className="text-orange-600">⏳ Análise final em andamento...</div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         )}
 
-                        <Button variant="outline" className="w-full">
+                        {captation.status === 'rejected' && (
+                          <div className="bg-red-50 border border-red-200 rounded-lg p-4 space-y-2">
+                            <div className="flex items-center gap-2">
+                              <AlertCircle className="h-5 w-5 text-red-600" />
+                              <p className="text-sm text-red-800 font-medium">❌ Solicitação Rejeitada</p>
+                            </div>
+                            <div className="text-xs text-red-700">
+                              <p>Esta solicitação não atendeu aos critérios de aprovação.</p>
+                              <p className="mt-1 font-medium">Entre em contato com nossa equipe para mais informações.</p>
+                            </div>
+                          </div>
+                        )}
+
+                        <Button 
+                          variant="outline" 
+                          className="w-full"
+                          onClick={() => handleViewDetails(captation)}
+                        >
                           <Eye className="h-4 w-4 mr-2" />
-                          Ver Detalhes
+                          Ver Detalhes Completos
                         </Button>
                       </CardContent>
                     </Card>
@@ -789,6 +837,262 @@ const MinhaEmpresa = () => {
                   )}
                 </Button>
               </form>
+            </DialogContent>
+          </Dialog>
+
+          {/* Captation Details Dialog */}
+          <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
+            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Detalhes Completos da Captação
+                </DialogTitle>
+                <DialogDescription>
+                  Informações detalhadas sobre sua solicitação de crédito
+                </DialogDescription>
+              </DialogHeader>
+              
+              {selectedCaptation && (
+                <div className="space-y-6">
+                  {/* Basic Information */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Card className="border border-gray-200">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <DollarSign className="h-5 w-5 text-green-600" />
+                          Informações Financeiras
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Valor Solicitado:</span>
+                          <span className="font-semibold text-lg">
+                            R$ {(selectedCaptation.requested_amount / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Prazo:</span>
+                          <span className="font-medium">{selectedCaptation.duration_months} meses</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Taxa de Juros Mensal:</span>
+                          <span className="font-medium">{selectedCaptation.monthly_interest_rate}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Retorno Esperado:</span>
+                          <span className="font-medium text-green-600">{selectedCaptation.expected_return}% a.a.</span>
+                        </div>
+                        <div className="pt-2 border-t">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Valor Total a Pagar:</span>
+                            <span className="font-semibold text-lg">
+                              R$ {((selectedCaptation.requested_amount / 100) * (1 + (selectedCaptation.expected_return / 100))).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                            </span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border border-gray-200">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <Calendar className="h-5 w-5 text-blue-600" />
+                          Cronograma
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Data da Solicitação:</span>
+                          <span className="font-medium">
+                            {new Date(selectedCaptation.created_at).toLocaleDateString('pt-BR', { 
+                              day: '2-digit', 
+                              month: 'long', 
+                              year: 'numeric' 
+                            })}
+                          </span>
+                        </div>
+                        {selectedCaptation.approved_at && (
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Data da Aprovação:</span>
+                            <span className="font-medium text-green-600">
+                              {new Date(selectedCaptation.approved_at).toLocaleDateString('pt-BR', { 
+                                day: '2-digit', 
+                                month: 'long', 
+                                year: 'numeric' 
+                              })}
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Pagamento Mensal Estimado:</span>
+                          <span className="font-medium">
+                            R$ {((selectedCaptation.requested_amount / 100) * (1 + (selectedCaptation.expected_return / 100)) / selectedCaptation.duration_months).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Vencimento Final:</span>
+                          <span className="font-medium">
+                            {new Date(new Date(selectedCaptation.created_at).setMonth(new Date(selectedCaptation.created_at).getMonth() + selectedCaptation.duration_months)).toLocaleDateString('pt-BR')}
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Company Information */}
+                  {company && (
+                    <Card className="border border-gray-200">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <Building2 className="h-5 w-5 text-purple-600" />
+                          Dados da Empresa
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Nome da Empresa</p>
+                          <p className="font-medium">{company.company_name}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">CNPJ</p>
+                          <p className="font-medium">{company.cnpj}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Faturamento Anual</p>
+                          <p className="font-medium">
+                            R$ {company.annual_revenue?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || 'N/A'}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Funcionários</p>
+                          <p className="font-medium">{company.employees_count || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Cidade</p>
+                          <p className="font-medium">{company.city}, {company.state}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Setor</p>
+                          <p className="font-medium">{company.business_sector || 'N/A'}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Purpose and Description */}
+                  <Card className="border border-gray-200">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <FileText className="h-5 w-5 text-orange-600" />
+                        Finalidade e Descrição
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2">Finalidade do Crédito</p>
+                        <div className="bg-gray-50 rounded-lg p-3">
+                          <p className="text-sm">{selectedCaptation.purpose}</p>
+                        </div>
+                      </div>
+                      {selectedCaptation.description && (
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-2">Descrição Detalhada</p>
+                          <div className="bg-gray-50 rounded-lg p-3">
+                            <p className="text-sm whitespace-pre-wrap">{selectedCaptation.description}</p>
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Status Information */}
+                  <Card className="border border-gray-200">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <TrendingUp className="h-5 w-5 text-indigo-600" />
+                        Status e Próximos Passos
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {selectedCaptation.status === 'approved' && (
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                          <div className="flex items-center gap-3 mb-3">
+                            <CheckCircle className="h-6 w-6 text-green-600" />
+                            <div>
+                              <p className="font-semibold text-green-800">Captação Aprovada e Ativa</p>
+                              <p className="text-sm text-green-700">Sua solicitação foi convertida em oportunidade de investimento</p>
+                            </div>
+                          </div>
+                          <div className="space-y-2 text-sm text-green-700">
+                            <p><strong>✓ Status:</strong> Disponível para investimento no marketplace</p>
+                            <p><strong>✓ Visibilidade:</strong> Listada publicamente para investidores</p>
+                            <p><strong>✓ Próximo passo:</strong> Aguardar investidores e acompanhar progresso na aba "Oportunidades Criadas"</p>
+                            <p><strong>✓ Quando captado:</strong> Fundos serão transferidos e cronograma de pagamentos será ativado</p>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {selectedCaptation.status === 'pending' && (
+                        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                          <div className="flex items-center gap-3 mb-3">
+                            <Clock className="h-6 w-6 text-orange-600" />
+                            <div>
+                              <p className="font-semibold text-orange-800">Análise em Andamento</p>
+                              <p className="text-sm text-orange-700">Sistema de auto-aprovação processando sua solicitação</p>
+                            </div>
+                          </div>
+                          <div className="space-y-1 text-sm text-orange-700">
+                            <p>⏳ Tempo estimado de aprovação: 5-10 minutos</p>
+                            <p>📋 Todos os critérios técnicos foram validados</p>
+                            <p>🔄 Processamento final em curso</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {selectedCaptation.status === 'rejected' && (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                          <div className="flex items-center gap-3 mb-3">
+                            <AlertCircle className="h-6 w-6 text-red-600" />
+                            <div>
+                              <p className="font-semibold text-red-800">Solicitação Rejeitada</p>
+                              <p className="text-sm text-red-700">Esta captação não atendeu aos critérios de aprovação</p>
+                            </div>
+                          </div>
+                          <div className="space-y-1 text-sm text-red-700">
+                            <p>📞 Entre em contato com nossa equipe para esclarecimentos</p>
+                            <p>📝 Você pode submeter uma nova solicitação com ajustes</p>
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  <div className="flex gap-3 pt-4 border-t">
+                    <Button 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => setShowDetailsDialog(false)}
+                    >
+                      Fechar
+                    </Button>
+                    {selectedCaptation.status === 'approved' && (
+                      <Button 
+                        className="flex-1 gradient-primary text-white"
+                        onClick={() => {
+                          setShowDetailsDialog(false);
+                          // Switch to opportunities tab
+                          const tabsTrigger = document.querySelector('[data-tabs-value="opportunities"]') as HTMLElement;
+                          tabsTrigger?.click();
+                        }}
+                      >
+                        <TrendingUp className="h-4 w-4 mr-2" />
+                        Ver Oportunidade Criada
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )}
             </DialogContent>
           </Dialog>
 
