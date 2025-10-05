@@ -3,7 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/ui/logo";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -14,14 +13,10 @@ export default function Register() {
   const navigate = useNavigate();
   const { register, isLoading, error, clearError } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-  const [userType, setUserType] = useState("client");
   const [formData, setFormData] = useState({
-    name: "",
     email: "",
     password: "",
-    confirmPassword: "",
-    cpf: "",
-    phone: ""
+    confirmPassword: ""
   });
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -35,12 +30,12 @@ export default function Register() {
 
     try {
       await register({
-        name: formData.name,
+        name: "Usuário", // Nome padrão
         email: formData.email,
         password: formData.password,
-        cpf: formData.cpf,
-        phone: formData.phone,
-        type: userType as 'client' | 'admin'
+        cpf: "000.000.000-00", // CPF padrão
+        phone: "(00) 00000-0000", // Telefone padrão
+        type: "client"
       });
       navigate("/dashboard");
     } catch (err) {
@@ -77,40 +72,6 @@ export default function Register() {
             )}
             
             <form onSubmit={handleRegister} className="space-y-6">
-              {/* User Type Selection */}
-              <div className="space-y-3">
-                <Label>Tipo de conta</Label>
-                <RadioGroup 
-                  value={userType} 
-                  onValueChange={setUserType}
-                  className="grid grid-cols-1 sm:grid-cols-2 gap-4"
-                >
-                  <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                    <RadioGroupItem value="client" id="client" />
-                    <Label htmlFor="client" className="cursor-pointer flex-1">Cliente</Label>
-                  </div>
-                  <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                    <RadioGroupItem value="admin" id="admin" />
-                    <Label htmlFor="admin" className="cursor-pointer flex-1">Administrador</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome completo</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="Seu nome completo"
-                  value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  className="h-12 text-base"
-                  autoComplete="name"
-                  required
-                  disabled={isLoading}
-                />
-              </div>
-
               <div className="space-y-2">
                 <Label htmlFor="email">E-mail</Label>
                 <Input
@@ -122,36 +83,6 @@ export default function Register() {
                   className="h-12 text-base"
                   autoComplete="email"
                   inputMode="email"
-                  required
-                  disabled={isLoading}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="cpf">CPF</Label>
-                <Input
-                  id="cpf"
-                  type="text"
-                  placeholder="000.000.000-00"
-                  value={formData.cpf}
-                  onChange={(e) => setFormData(prev => ({ ...prev, cpf: e.target.value }))}
-                  className="h-12 text-base"
-                  autoComplete="off"
-                  required
-                  disabled={isLoading}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="phone">Telefone</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="(11) 99999-9999"
-                  value={formData.phone}
-                  onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                  className="h-12 text-base"
-                  autoComplete="tel"
                   required
                   disabled={isLoading}
                 />
