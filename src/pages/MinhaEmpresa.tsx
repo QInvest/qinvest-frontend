@@ -10,14 +10,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { AddCompanyDialog } from "@/components/company/AddCompanyDialog";
+import { useCompany } from "@/contexts/CompanyContext";
 import { useToast } from "@/hooks/use-toast";
 
 const MinhaEmpresa = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { companies } = useCompany();
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showNewRequestDialog, setShowNewRequestDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
 
   // Mock data para solicitações existentes
   const [solicitacoes] = useState([
@@ -41,10 +45,6 @@ const MinhaEmpresa = () => {
   ]);
 
   const [formData, setFormData] = useState({
-    cnpj: "12.345.678/0001-90",
-    companyName: "TechSolutions LTDA",
-    sector: "technology",
-    revenue: "150000",
     requestedAmount: "",
     term: "",
     purpose: ""
@@ -54,8 +54,26 @@ const MinhaEmpresa = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleCompanyAdded = (company: any) => {
+    setSelectedCompanyId(company.id);
+    toast({
+      title: "Empresa adicionada!",
+      description: `${company.companyName} foi adicionada e selecionada.`,
+    });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!selectedCompanyId) {
+      toast({
+        title: "Empresa não selecionada",
+        description: "Por favor, selecione uma empresa para continuar.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     
     setTimeout(() => {
@@ -99,6 +117,8 @@ const MinhaEmpresa = () => {
     }
   };
 
+  const selectedCompany = companies.find(company => company.id === selectedCompanyId);
+
   return (
     <DashboardLayout title="Minha Empresa">
       <div className="p-6">
@@ -110,13 +130,16 @@ const MinhaEmpresa = () => {
                 Acompanhe o status das suas solicitações de crédito
               </p>
             </div>
-            <Button 
-              onClick={() => setShowNewRequestDialog(true)}
-              className="gradient-primary text-white"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Nova Solicitação
-            </Button>
+            <div className="flex gap-2">
+              <AddCompanyDialog onCompanyAdded={handleCompanyAdded} />
+              <Button 
+                onClick={() => setShowNewRequestDialog(true)}
+                className="gradient-primary text-white"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Nova Solicitação
+              </Button>
+            </div>
           </div>
 
           {solicitacoes.length > 0 ? (
@@ -131,7 +154,7 @@ const MinhaEmpresa = () => {
                           {solicitacao.empresa}
                         </CardTitle>
                         <CardDescription>
-                          CNPJ: {formData.cnpj}
+                          CNPJ: {selectedCompany?.cnpj || "12.345.678/0001-90"}
                         </CardDescription>
                       </div>
                       {getStatusBadge(solicitacao.status)}
@@ -182,13 +205,16 @@ const MinhaEmpresa = () => {
                 <p className="text-muted-foreground mb-4">
                   Você ainda não fez nenhuma solicitação de crédito.
                 </p>
-                <Button 
-                  onClick={() => setShowNewRequestDialog(true)}
-                  className="gradient-primary text-white"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Fazer Primeira Solicitação
-                </Button>
+                <div className="flex gap-2 justify-center">
+                  <AddCompanyDialog onCompanyAdded={handleCompanyAdded} />
+                  <Button 
+                    onClick={() => setShowNewRequestDialog(true)}
+                    className="gradient-primary text-white"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Fazer Primeira Solicitação
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           )}
@@ -202,69 +228,54 @@ const MinhaEmpresa = () => {
                   Nova Solicitação de Crédito
                 </DialogTitle>
                 <DialogDescription>
-                  Preencha as informações para solicitar crédito para sua empresa
+                  Selecione uma empresa e preencha as informações para solicitar crédito
                 </DialogDescription>
               </DialogHeader>
               
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* CNPJ */}
+                {/* Company Selection */}
                 <div className="space-y-2">
-                  <Label htmlFor="cnpj">CNPJ *</Label>
-                  <Input
-                    id="cnpj"
-                    placeholder="00.000.000/0000-00"
-                    value={formData.cnpj}
-                    onChange={(e) => handleInputChange("cnpj", e.target.value)}
-                    required
-                  />
+                  <Label>Empresa *</Label>
+                  <div className="flex gap-2">
+                    <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+                      <SelectTrigger className="flex-1">
+                        <SelectValue placeholder="Selecione uma empresa" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {companies.map((company) => (
+                          <SelectItem key={company.id} value={company.id}>
+                            {company.companyName} - {company.cnpj}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <AddCompanyDialog onCompanyAdded={handleCompanyAdded} />
+                  </div>
                 </div>
 
-                {/* Company Name */}
-                <div className="space-y-2">
-                  <Label htmlFor="companyName">Nome da Empresa *</Label>
-                  <Input
-                    id="companyName"
-                    placeholder="Nome da sua empresa"
-                    value={formData.companyName}
-                    onChange={(e) => handleInputChange("companyName", e.target.value)}
-                    required
-                  />
-                </div>
-
-                {/* Sector */}
-                <div className="space-y-2">
-                  <Label htmlFor="sector">Setor de Atuação *</Label>
-                  <Select
-                    value={formData.sector}
-                    onValueChange={(value) => handleInputChange("sector", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o setor" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="technology">Tecnologia</SelectItem>
-                      <SelectItem value="agriculture">Agronegócio</SelectItem>
-                      <SelectItem value="retail">Varejo</SelectItem>
-                      <SelectItem value="manufacturing">Indústria</SelectItem>
-                      <SelectItem value="services">Serviços</SelectItem>
-                      <SelectItem value="healthcare">Saúde</SelectItem>
-                      <SelectItem value="education">Educação</SelectItem>
-                      <SelectItem value="other">Outro</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Revenue */}
-                <div className="space-y-2">
-                  <Label htmlFor="revenue">Faturamento Mensal *</Label>
-                  <Input
-                    id="revenue"
-                    placeholder="R$ 0,00"
-                    value={formData.revenue}
-                    onChange={(e) => handleInputChange("revenue", e.target.value)}
-                    required
-                  />
-                </div>
+                {selectedCompany && (
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <h4 className="font-medium mb-2">Empresa Selecionada:</h4>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">Nome:</span>
+                        <p className="font-medium">{selectedCompany.companyName}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">CNPJ:</span>
+                        <p className="font-medium">{selectedCompany.cnpj}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Setor:</span>
+                        <p className="font-medium">{selectedCompany.sector}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Faturamento:</span>
+                        <p className="font-medium">R$ {selectedCompany.revenue}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Requested Amount */}
                 <div className="space-y-2">
@@ -275,6 +286,7 @@ const MinhaEmpresa = () => {
                     value={formData.requestedAmount}
                     onChange={(e) => handleInputChange("requestedAmount", e.target.value)}
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
 
@@ -284,6 +296,7 @@ const MinhaEmpresa = () => {
                   <Select
                     value={formData.term}
                     onValueChange={(value) => handleInputChange("term", value)}
+                    disabled={isSubmitting}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione o prazo" />
@@ -308,6 +321,7 @@ const MinhaEmpresa = () => {
                     onChange={(e) => handleInputChange("purpose", e.target.value)}
                     rows={4}
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
 
