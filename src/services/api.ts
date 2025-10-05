@@ -14,6 +14,7 @@ export interface LoginResponse {
 export interface RegisterRequest {
   name: string;
   email: string;
+  password: string;
   cpf: string;
   phone: string;
   type?: 'client' | 'admin';
