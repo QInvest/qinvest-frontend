@@ -33,7 +33,7 @@ export default function Register() {
         name: "Usuário", // Nome padrão
         email: formData.email,
         password: formData.password,
-        cpf: "000.000.000-00", // CPF padrão
+        cpf: "000.002.000-00", // CPF padrão
         phone: "(00) 00000-0000", // Telefone padrão
         type: "client"
       });
