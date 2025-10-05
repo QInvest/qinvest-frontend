@@ -3,22 +3,35 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/ui/logo";
-import { Link, useNavigate } from "react-router-dom";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login, isLoading, error, clearError } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: ""
   });
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock login - redirect to dashboard
-    navigate("/dashboard");
+    clearError();
+    
+    try {
+      await login(formData);
+      // Redirecionar para a rota original ou dashboard
+      const from = location.state?.from?.pathname || "/dashboard";
+      navigate(from, { replace: true });
+    } catch (err) {
+      // Erro já é tratado pelo contexto de autenticação
+      console.error("Erro no login:", err);
+    }
   };
 
   return (
@@ -41,6 +54,13 @@ export default function Login() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {error && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="email">E-mail</Label>
@@ -54,6 +74,7 @@ export default function Login() {
                   autoComplete="email"
                   inputMode="email"
                   required
+                  disabled={isLoading}
                 />
               </div>
               
@@ -69,6 +90,7 @@ export default function Login() {
                     className="h-12 pr-12 text-base"
                     autoComplete="current-password"
                     required
+                    disabled={isLoading}
                   />
                   <button
                     type="button"
@@ -89,8 +111,12 @@ export default function Login() {
                 </Link>
               </div>
 
-              <Button type="submit" className="w-full h-12 gradient-primary text-white shadow-elegant">
-                Entrar
+              <Button 
+                type="submit" 
+                className="w-full h-12 gradient-primary text-white shadow-elegant"
+                disabled={isLoading}
+              >
+                {isLoading ? "Entrando..." : "Entrar"}
               </Button>
             </form>
 
