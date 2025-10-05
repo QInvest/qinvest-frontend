@@ -44,15 +44,25 @@ npm run format
 ## 📁 Estrutura do Projeto
 
 ```
-src/
-├── components/          # Componentes reutilizáveis
-│   ├── ui/             # Componentes base (shadcn/ui)
-│   ├── layout/         # Componentes de layout
-│   └── investment/     # Componentes específicos de investimento
-├── pages/              # Páginas da aplicação
-├── hooks/              # Custom hooks
-├── lib/                # Utilitários e configurações
-└── data/               # Dados mock e constantes
+📁 qinvest-frontend/
+├── 📁 src/
+│   ├── 📁 components/         # Componentes reutilizáveis
+│   │   ├── 📁 auth/          # 🔐 Autenticação e login
+│   │   ├── 📁 company/       # 🏢 Gestão de empresas
+│   │   ├── 📁 investment/    # 📈 Investimentos e oportunidades
+│   │   ├── 📁 layout/        # 🎨 Layout e navegação
+│   │   └── 📁 ui/            # 🧩 Componentes base (shadcn/ui)
+│   ├── 📁 contexts/          # 🔄 Context API (Auth, Company)
+│   ├── 📁 data/              # 📊 Dados mockados e constantes
+│   ├── 📁 hooks/             # 🪝 Custom hooks React
+│   ├── 📁 lib/               # 🛠️ Utilitários e configurações
+│   ├── 📁 pages/             # 📄 Páginas da aplicação
+│   │   ├── 📁 auth/          # 🔑 Login, registro, etc.
+│   │   └── 📁 ...            # Dashboard, oportunidades, etc.
+│   └── 📁 services/          # 🌐 Cliente API e integrações
+├── 📄 package.json           # 📦 Dependências
+├── 📄 vite.config.ts         # ⚙️ Configuração Vite
+└── 📄 tailwind.config.ts     # 🎨 Configuração Tailwind
 ```
 
 ## 🎯 Funcionalidades
