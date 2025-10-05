@@ -2,6 +2,9 @@
 
 Uma plataforma moderna de investimentos peer-to-peer que conecta empresas que precisam de crédito com investidores que buscam rentabilidade.
 
+Deploy frontend:
+https://qinvest-frontend.vercel.app/
+
 ## 🚀 Tecnologias
 
 - **React** - Biblioteca para interfaces de usuário
