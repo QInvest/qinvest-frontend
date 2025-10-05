@@ -52,15 +52,15 @@ export default function Register() {
                 <RadioGroup 
                   value={userType} 
                   onValueChange={setUserType}
-                  className="grid grid-cols-2 gap-4"
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-4"
                 >
-                  <div className="flex items-center space-x-2 p-3 border rounded-lg">
+                  <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
                     <RadioGroupItem value="investor" id="investor" />
-                    <Label htmlFor="investor" className="cursor-pointer">Investidor</Label>
+                    <Label htmlFor="investor" className="cursor-pointer flex-1">Investidor</Label>
                   </div>
-                  <div className="flex items-center space-x-2 p-3 border rounded-lg">
+                  <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
                     <RadioGroupItem value="company" id="company" />
-                    <Label htmlFor="company" className="cursor-pointer">Empresa</Label>
+                    <Label htmlFor="company" className="cursor-pointer flex-1">Empresa</Label>
                   </div>
                 </RadioGroup>
               </div>
@@ -73,7 +73,8 @@ export default function Register() {
                   placeholder={userType === "company" ? "Nome da sua empresa" : "Seu nome completo"}
                   value={formData.name}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  className="h-12"
+                  className="h-12 text-base"
+                  autoComplete="name"
                   required
                 />
               </div>
@@ -86,7 +87,9 @@ export default function Register() {
                   placeholder="seu@email.com"
                   value={formData.email}
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                  className="h-12"
+                  className="h-12 text-base"
+                  autoComplete="email"
+                  inputMode="email"
                   required
                 />
               </div>
@@ -100,13 +103,14 @@ export default function Register() {
                     placeholder="••••••••"
                     value={formData.password}
                     onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                    className="h-12 pr-12"
+                    className="h-12 pr-12 text-base"
+                    autoComplete="new-password"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground touch-manipulation"
                   >
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
@@ -121,7 +125,8 @@ export default function Register() {
                   placeholder="••••••••"
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                  className="h-12"
+                  className="h-12 text-base"
+                  autoComplete="new-password"
                   required
                 />
               </div>

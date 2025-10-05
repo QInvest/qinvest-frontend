@@ -11,23 +11,23 @@ export default function Landing() {
       <Header />
       
       {/* Hero Section */}
-      <section className="pt-24 pb-16 px-4">
+      <section className="pt-20 sm:pt-24 pb-12 sm:pb-16 px-4">
         <div className="container mx-auto text-center">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-success bg-clip-text text-transparent">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-primary to-success bg-clip-text text-transparent">
               Investimentos P2P simples, seguros e acessíveis
             </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground mb-6 sm:mb-8 max-w-3xl mx-auto">
               Conectamos empresas que precisam de crédito com investidores que buscam rentabilidade.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <Button size="lg" className="gradient-primary text-white shadow-elegant" asChild>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-12">
+              <Button size="lg" className="gradient-primary text-white shadow-elegant h-12 sm:h-14" asChild>
                 <Link to="/login">
                   Quero Investir
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white" asChild>
+              <Button size="lg" variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white h-12 sm:h-14" asChild>
                 <Link to="/login">
                   Quero Crédito
                 </Link>
@@ -38,18 +38,18 @@ export default function Landing() {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-16 px-4 bg-muted/50">
+      <section className="py-12 sm:py-16 px-4 bg-muted/50">
         <div className="container mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
               Por que escolher a Qinvest?
             </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
               Uma plataforma completa para conectar oportunidades de investimento
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto">
             {/* PMEs Access Credit */}
             <Card className="text-center shadow-card hover:shadow-card-hover transition-all duration-300 border-0">
               <CardHeader>
@@ -141,39 +141,39 @@ export default function Landing() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 px-4">
+      <section className="py-12 sm:py-16 px-4">
         <div className="container mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center">
             <div>
-              <div className="text-4xl font-bold text-primary mb-2">R$ 50M+</div>
-              <div className="text-muted-foreground">Volume investido</div>
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary mb-2">R$ 50M+</div>
+              <div className="text-sm sm:text-base text-muted-foreground">Volume investido</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-success mb-2">2.500+</div>
-              <div className="text-muted-foreground">Investidores ativos</div>
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-success mb-2">2.500+</div>
+              <div className="text-sm sm:text-base text-muted-foreground">Investidores ativos</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-primary mb-2">800+</div>
-              <div className="text-muted-foreground">Empresas financiadas</div>
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary mb-2">800+</div>
+              <div className="text-sm sm:text-base text-muted-foreground">Empresas financiadas</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-success mb-2">12.5%</div>
-              <div className="text-muted-foreground">Rentabilidade média</div>
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-success mb-2">12.5%</div>
+              <div className="text-sm sm:text-base text-muted-foreground">Rentabilidade média</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 px-4 bg-gradient-to-r from-primary to-success">
+      <section className="py-12 sm:py-16 px-4 bg-gradient-to-r from-primary to-success">
         <div className="container mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">
             Pronto para começar?
           </h2>
-          <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl text-white/90 mb-6 sm:mb-8 max-w-2xl mx-auto">
             Junte-se a milhares de investidores e empresas que já confiam na Qinvest
           </p>
-          <Button size="lg" className="bg-white text-primary hover:bg-white/90 shadow-elegant" asChild>
+          <Button size="lg" className="bg-white text-primary hover:bg-white/90 shadow-elegant h-12 sm:h-14" asChild>
             <Link to="/register">
               Criar Conta Grátis
               <ArrowRight className="ml-2 h-5 w-5" />

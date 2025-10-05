@@ -128,6 +128,20 @@ All colors MUST be HSL for proper theme support.
     @apply bg-background text-foreground font-inter;
   }
 
+  /* Mobile optimizations */
+  @media (max-width: 768px) {
+    /* Prevent zoom on input focus */
+    input, select, textarea {
+      font-size: 16px;
+    }
+    
+    /* Improve touch targets */
+    button, a, [role="button"] {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+
   /* Utility classes for common patterns */
   .gradient-primary {
     background: var(--gradient-primary);
@@ -147,5 +161,21 @@ All colors MUST be HSL for proper theme support.
 
   .shadow-elegant {
     box-shadow: var(--shadow-elegant);
+  }
+
+  /* Touch-friendly interactions */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Focus styles for accessibility */
+  .focus-visible:focus-visible {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
   }
 }

@@ -1,7 +1,8 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   TrendingUp,
   Target,
@@ -10,7 +11,8 @@ import {
   CreditCard,
   Building2,
   Eye,
-  AlertCircle
+  AlertCircle,
+  Menu
 } from "lucide-react";
 import { mockCarteira } from "@/data/mockData";
 
@@ -22,6 +24,7 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children, title, showBalance = true }: DashboardLayoutProps) {
   const location = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navigationItems = [
     {
@@ -56,12 +59,52 @@ export function DashboardLayout({ children, title, showBalance = true }: Dashboa
     }
   ];
 
+  const NavigationContent = () => (
+    <nav className="space-y-2">
+      {navigationItems.map((item) => {
+        const Icon = item.icon;
+        return (
+          <Link
+            key={item.to}
+            to={item.to}
+            className={`flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors ${
+              item.active
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+            }`}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <Icon className="h-5 w-5" />
+            <span>{item.label}</span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+
   return (
     <div className="min-h-screen bg-muted/30 font-inter">
       {/* Header */}
       <header className="bg-white border-b border-border sticky top-0 z-40">
-        <div className="px-6 h-16 flex items-center justify-between">
+        <div className="px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-4">
+            {/* Mobile Menu Button */}
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="lg:hidden">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-64 p-0">
+                <div className="p-4">
+                  <Logo />
+                </div>
+                <div className="px-4">
+                  <NavigationContent />
+                </div>
+              </SheetContent>
+            </Sheet>
+            
             <Logo />
             <div className="hidden md:block h-6 w-px bg-border" />
             <h1 className="hidden md:block text-xl font-semibold">
@@ -69,11 +112,11 @@ export function DashboardLayout({ children, title, showBalance = true }: Dashboa
             </h1>
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             {showBalance && (
               <div className="text-right hidden sm:block">
                 <div className="text-sm text-muted-foreground">Saldo disponível</div>
-                <div className="text-2xl font-bold text-success">
+                <div className="text-xl sm:text-2xl font-bold text-success">
                   R$ {mockCarteira.saldoDisponivel.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
               </div>
@@ -91,31 +134,15 @@ export function DashboardLayout({ children, title, showBalance = true }: Dashboa
       </header>
 
       <div className="flex">
-        {/* Sidebar */}
+        {/* Desktop Sidebar */}
         <aside className="w-64 bg-white border-r border-border h-[calc(100vh-4rem)] sticky top-16 hidden lg:block">
-          <nav className="p-4 space-y-2">
-            {navigationItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  className={`flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors ${
-                    item.active
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                  }`}
-                >
-                  <Icon className="h-5 w-5" />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
+          <div className="p-4">
+            <NavigationContent />
+          </div>
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1">
+        <main className="flex-1 min-w-0">
           {children}
         </main>
       </div>

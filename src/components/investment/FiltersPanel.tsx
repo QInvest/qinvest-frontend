@@ -153,7 +153,7 @@ export function FiltersPanel({
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Filtros</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           {content}
         </CardContent>
       </Card>

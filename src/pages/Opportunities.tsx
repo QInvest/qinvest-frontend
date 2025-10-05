@@ -26,9 +26,9 @@ export default function Opportunities() {
 
   return (
     <DashboardLayout title="Oportunidades de Investimento">
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
             {/* Filters Sidebar */}
             <div className="hidden lg:block">
               <FiltersPanel
@@ -39,7 +39,7 @@ export default function Opportunities() {
             </div>
 
             {/* Main Content */}
-            <div className="lg:col-span-3 space-y-6">
+            <div className="lg:col-span-3 space-y-4 sm:space-y-6">
               {/* Search and Mobile Filters */}
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1">
@@ -70,7 +70,7 @@ export default function Opportunities() {
 
               {/* Opportunities Grid */}
               {filteredOportunidades.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   {filteredOportunidades.map((oportunidade) => (
                     <CardOportunidade
                       key={oportunidade.id}

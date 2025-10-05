@@ -14,7 +14,7 @@ export function WalletSummary({ carteira, onDepositar, onSacar, variant = 'expan
   const isCompact = variant === 'compact';
 
   return (
-    <div className={`grid gap-4 ${isCompact ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
+    <div className={`grid gap-4 ${isCompact ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'}`}>
       {/* Saldo Disponível */}
       <Card className="shadow-card border-0">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -24,12 +24,12 @@ export function WalletSummary({ carteira, onDepositar, onSacar, variant = 'expan
           <CreditCard className="h-4 w-4 text-success" />
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold text-success">
+          <div className="text-2xl sm:text-3xl font-bold text-success">
             R$ {carteira.saldoDisponivel.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </div>
           <p className="text-xs text-muted-foreground mt-1">Disponível para investir</p>
           {!isCompact && (
-            <div className="flex gap-2 mt-4">
+            <div className="flex flex-col sm:flex-row gap-2 mt-4">
               <Button size="sm" onClick={onDepositar} className="flex-1">
                 Depositar
               </Button>
@@ -50,7 +50,7 @@ export function WalletSummary({ carteira, onDepositar, onSacar, variant = 'expan
           <TrendingUp className="h-4 w-4 text-primary" />
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold">
+          <div className="text-2xl sm:text-3xl font-bold">
             R$ {carteira.patrimonioInvestido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </div>
           <p className="text-xs text-muted-foreground mt-1">Valor total investido</p>
@@ -66,7 +66,7 @@ export function WalletSummary({ carteira, onDepositar, onSacar, variant = 'expan
           <Coins className="h-4 w-4 text-success" />
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold text-success">
+          <div className="text-2xl sm:text-3xl font-bold text-success">
             R$ {carteira.lucroHistorico.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </div>
           <p className="text-xs text-success mt-1">

@@ -50,7 +50,9 @@ export default function Login() {
                   placeholder="seu@email.com"
                   value={formData.email}
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                  className="h-12"
+                  className="h-12 text-base"
+                  autoComplete="email"
+                  inputMode="email"
                   required
                 />
               </div>
@@ -64,13 +66,14 @@ export default function Login() {
                     placeholder="••••••••"
                     value={formData.password}
                     onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                    className="h-12 pr-12"
+                    className="h-12 pr-12 text-base"
+                    autoComplete="current-password"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground touch-manipulation"
                   >
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
