@@ -472,6 +472,26 @@ class ApiService {
     return portfolio.investments;
   }
 
+  async getUserOpportunitySummary(opportunityId: string): Promise<{
+    opportunity_id: string;
+    user_summary: {
+      total_quotas_owned: number;
+      total_amount_invested: number;
+      investment_count: number;
+      investments: Investment[];
+    };
+    opportunity_limits: {
+      min_investment_quotas: number;
+      max_investment_quotas?: number;
+      remaining_quotas_available: number;
+      remaining_quotas_for_user?: number;
+    };
+  }> {
+    return this.request(`/api/p2p/opportunities/${opportunityId}/user-summary`, {
+      method: 'GET',
+    });
+  }
+
   // Company Dashboard
   async getCompanyDashboard(): Promise<CompanyDashboard> {
     return this.request<CompanyDashboard>('/api/p2p/dashboard/company', {
