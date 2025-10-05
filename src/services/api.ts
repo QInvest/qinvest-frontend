@@ -105,8 +105,8 @@ class ApiService {
   }
 
   async logout(): Promise<void> {
-    // Como estamos usando cookies HTTP-only, o logout é feito removendo o cookie
-    // O backend pode implementar um endpoint de logout se necessário
+    // Limpar o cookie de acesso
+    document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     return Promise.resolve();
   }
 }

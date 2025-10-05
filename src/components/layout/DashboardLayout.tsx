@@ -1,5 +1,5 @@
 import { ReactNode, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -12,9 +12,11 @@ import {
   Building2,
   Eye,
   AlertCircle,
-  Menu
+  Menu,
+  LogOut
 } from "lucide-react";
 import { mockCarteira } from "@/data/mockData";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -24,7 +26,18 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children, title, showBalance = true }: DashboardLayoutProps) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout, user } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/");
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
+    }
+  };
 
   const navigationItems = [
     {
@@ -79,6 +92,15 @@ export function DashboardLayout({ children, title, showBalance = true }: Dashboa
           </Link>
         );
       })}
+      
+      {/* Logout Button */}
+      <button
+        onClick={handleLogout}
+        className="flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors text-muted-foreground hover:bg-muted/50 hover:text-foreground w-full text-left"
+      >
+        <LogOut className="h-5 w-5" />
+        <span>Sair</span>
+      </button>
     </nav>
   );
 
@@ -121,6 +143,15 @@ export function DashboardLayout({ children, title, showBalance = true }: Dashboa
                 </div>
               </div>
             )}
+            
+            {/* User Info */}
+            {user && (
+              <div className="hidden md:block text-right">
+                <div className="text-sm text-muted-foreground">Olá,</div>
+                <div className="text-sm font-medium">{user.name}</div>
+              </div>
+            )}
+            
             <Button variant="outline" size="icon">
               <Bell className="h-4 w-4" />
             </Button>
@@ -128,6 +159,11 @@ export function DashboardLayout({ children, title, showBalance = true }: Dashboa
               <Link to="/settings">
                 <Settings className="h-4 w-4" />
               </Link>
+            </Button>
+            
+            {/* Logout Button */}
+            <Button variant="outline" size="icon" onClick={handleLogout} title="Sair">
+              <LogOut className="h-4 w-4" />
             </Button>
           </div>
         </div>
