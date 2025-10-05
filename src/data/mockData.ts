@@ -190,6 +190,22 @@ export const mockOportunidades: Oportunidade[] = [
     site: "https://ecotech.com.br",
     garantia: "Equipamentos",
     capitalSocial: 5000000.0
+  },
+  {
+    id: "opp-006",
+    foto: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=400&h=300&fit=crop",
+    nome: "Empresa Qinvest",
+    risco: "A",
+    retornoBruto: 14.0,
+    prazo: 12,
+    percentualCaptacao: 85,
+    valorCota: 1000.0,
+    cnpj: "12.345.678/0001-95",
+    faturamentoAnual: 25000000.0,
+    setor: "Plataforma P2P (CNAE 6619)",
+    site: "https://qinvest.com.br",
+    garantia: "Fundo de reserva",
+    capitalSocial: 8000000.0
   }
 ];
 
@@ -272,6 +288,78 @@ export const mockInvestimentos: Investimento[] = [
         valor: 287.5,
         status: "pago",
         dataPagamento: "2024-04-01T10:00:00Z"
+      }
+    ]
+  },
+  {
+    id: "inv-003",
+    empresaId: "opp-006",
+    foto: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=400&h=300&fit=crop",
+    nome: "Empresa Qinvest",
+    risco: "A",
+    numCotas: 8,
+    valorInvestido: 8000.0,
+    valorRecebido: 1866.67,
+    valorAReceber: 6133.33,
+    lucroEsperado: 1120.0,
+    vencimento: "2025-10-20T00:00:00Z",
+    status: "aberto",
+    parcelas: [
+      {
+        numero: 1,
+        data: "2024-10-20T00:00:00Z",
+        valor: 933.33,
+        status: "pago",
+        dataPagamento: "2024-10-20T14:30:00Z"
+      },
+      {
+        numero: 2,
+        data: "2024-11-20T00:00:00Z",
+        valor: 933.33,
+        status: "pago",
+        dataPagamento: "2024-11-20T15:45:00Z"
+      },
+      {
+        numero: 3,
+        data: "2024-12-20T00:00:00Z",
+        valor: 933.33,
+        status: "aguardando",
+        dataPagamento: null
+      },
+      {
+        numero: 4,
+        data: "2025-01-20T00:00:00Z",
+        valor: 933.33,
+        status: "aguardando",
+        dataPagamento: null
+      },
+      {
+        numero: 5,
+        data: "2025-02-20T00:00:00Z",
+        valor: 933.33,
+        status: "aguardando",
+        dataPagamento: null
+      },
+      {
+        numero: 6,
+        data: "2025-03-20T00:00:00Z",
+        valor: 933.33,
+        status: "aguardando",
+        dataPagamento: null
+      },
+      {
+        numero: 7,
+        data: "2025-04-20T00:00:00Z",
+        valor: 933.33,
+        status: "aguardando",
+        dataPagamento: null
+      },
+      {
+        numero: 8,
+        data: "2025-05-20T00:00:00Z",
+        valor: 933.33,
+        status: "aguardando",
+        dataPagamento: null
       }
     ]
   }

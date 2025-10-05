@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { apiService, Investment } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
+import { mockInvestimentos } from "@/data/mockData";
 
 // Define the Investimento interface locally to match frontend expectations
 interface Parcela {
@@ -65,8 +66,25 @@ export default function MeusInvestimentos() {
       try {
         setLoading(true);
         setError(null);
+
+        // Fetch real investments from API
         const userInvestments = await apiService.getUserInvestments();
-        setInvestments(userInvestments);
+
+        // Convert mock investments to API format for consistency
+        const mockInvestmentsFormatted = mockInvestimentos.map(mockInv => ({
+          investment_id: mockInv.id,
+          opportunity_id: mockInv.empresaId,
+          investor_id: "user-001", // Mock user ID
+          quotas_purchased: mockInv.numCotas,
+          investment_amount: mockInv.valorInvestido * 100, // Convert to cents
+          status: mockInv.status === 'aberto' ? 'confirmed' : mockInv.status === 'finalizado' ? 'completed' : 'pending',
+          created_at: new Date().toISOString(),
+          confirmed_at: mockInv.status !== 'analise' ? new Date().toISOString() : null,
+        }));
+
+        // Combine API investments with mock investments
+        const allInvestments = [...userInvestments, ...mockInvestmentsFormatted];
+        setInvestments(allInvestments);
       } catch (error) {
         console.error('Error fetching investments:', error);
         setError('Erro ao carregar investimentos');

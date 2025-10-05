@@ -1,5 +1,14 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
+/**
+ * API Service com suporte duplo de autenticação:
+ * 1. Bearer Token (localStorage) - Método principal
+ * 2. Cookies (httpOnly) - Fallback automático
+ *
+ * Todas as requisições autenticadas tentam primeiro com Bearer token,
+ * e em caso de falha, fazem fallback para cookies automaticamente.
+ */
+
 export interface LoginRequest {
   email: string;
   password: string;
@@ -226,23 +235,28 @@ class ApiService {
 
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    requiresAuth: boolean = false
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    
+
     const defaultHeaders = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept',
-      'Access-Control-Allow-Credentials': 'true',
     };
+
+    let headers = { ...defaultHeaders };
+
+    // Adicionar headers de autenticação se necessário
+    if (requiresAuth) {
+      const authHeaders = this.getAuthHeaders();
+      headers = { ...headers, ...authHeaders };
+    }
 
     const config: RequestInit = {
       ...options,
       headers: {
-        ...defaultHeaders,
+        ...headers,
         ...options.headers,
       },
       credentials: 'include', // Para incluir cookies
@@ -251,7 +265,7 @@ class ApiService {
 
     try {
       const response = await fetch(url, config);
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
@@ -282,23 +296,109 @@ class ApiService {
   }
 
   async getCurrentUser(): Promise<User> {
-    return this.request<User>('/api/auth/me', {
+    return this.requestWithFallback<User>('/api/auth/me', {
       method: 'GET',
-    });
+    }, true); // Tenta Bearer primeiro, depois cookies
   }
 
   async logout(): Promise<void> {
-    // Limpar o cookie de acesso
+    // Limpar token do localStorage (Bearer token)
+    localStorage.removeItem('access_token');
+
+    // Limpar cookies também (para suporte duplo)
     document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+
     return Promise.resolve();
   }
 
+  // Verificar se usuário está autenticado (Bearer token ou cookies)
+  async isAuthenticated(): Promise<boolean> {
+    try {
+      // Tentar obter dados do usuário atual (funcionará com Bearer ou cookies)
+      await this.getCurrentUser();
+      return true;
+    } catch (error) {
+      // Se falhar, usuário não está autenticado
+      return false;
+    }
+  }
+
   private getAuthHeaders(): HeadersInit {
-    const token = localStorage.getItem('access_token') || '';
+    const token = localStorage.getItem('access_token');
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+
+    // Tentar usar Bearer token primeiro (localStorage)
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    // Retorna headers com autenticação (Bearer ou cookies via credentials: 'include')
+    return headers;
+  }
+
+  // Método alternativo que força tentativa apenas com cookies (sem Bearer)
+  private getCookieAuthHeaders(): HeadersInit {
     return {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      // Não inclui Authorization header, deixando para o backend usar cookies
     };
+  }
+
+  // Método que tenta primeiro Bearer token, depois cookies (ambas as opções)
+  async requestWithFallback<T>(
+    endpoint: string,
+    options: RequestInit = {},
+    requiresAuth: boolean = false
+  ): Promise<T> {
+    // Tentar primeiro com Bearer token
+    if (requiresAuth) {
+      try {
+        return await this.request<T>(endpoint, options, true);
+      } catch (error) {
+        // Se falhar, tentar apenas com cookies
+        console.log('Tentativa com Bearer token falhou, tentando com cookies...');
+        return await this.requestWithCookiesOnly<T>(endpoint, options);
+      }
+    }
+
+    return await this.request<T>(endpoint, options, false);
+  }
+
+  // Requisição usando apenas cookies (sem Bearer token)
+  private async requestWithCookiesOnly<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<T> {
+    const url = `${this.baseURL}${endpoint}`;
+
+    const config: RequestInit = {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        ...options.headers,
+      },
+      credentials: 'include', // Para incluir cookies
+      mode: 'cors', // Força o modo CORS
+    };
+
+    try {
+      const response = await fetch(url, config);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Erro de rede ou servidor');
+    }
   }
 
   async fetchWallet(): Promise<WalletData> {
@@ -369,7 +469,7 @@ class ApiService {
     return this.request<Company>('/api/auth/companies', {
       method: 'POST',
       body: JSON.stringify(companyData),
-    });
+    }, true); // Requer autenticação
   }
 
   async getMyCompany(): Promise<Company> {
@@ -385,25 +485,25 @@ class ApiService {
     return this.request<Company>(`/api/auth/companies/${company.company_id}`, {
       method: 'PUT',
       body: JSON.stringify(companyData),
-    });
+    }, true); // Requer autenticação
   }
 
   async listCompanies(): Promise<Company[]> {
     return this.request<Company[]>('/api/auth/companies', {
       method: 'GET',
-    });
+    }, true); // Requer autenticação
   }
 
   async getCompany(companyId: string): Promise<Company> {
     return this.request<Company>(`/api/auth/companies/${companyId}`, {
       method: 'GET',
-    });
+    }, true); // Requer autenticação
   }
 
   async deleteCompany(companyId: string): Promise<{message: string}> {
     return this.request<{message: string}>(`/api/auth/companies/${companyId}`, {
       method: 'DELETE',
-    });
+    }, true); // Requer autenticação
   }
 
   // P2P Captation Methods (Company funding requests)
@@ -411,21 +511,21 @@ class ApiService {
     return this.request<Captation>('/api/p2p/captations', {
       method: 'POST',
       body: JSON.stringify(captationData),
-    });
+    }, true); // Requer autenticação
   }
 
   async listCaptations(status?: string): Promise<Captation[]> {
     const params = status ? `?status=${status}` : '';
     return this.request<Captation[]>(`/api/p2p/captations${params}`, {
       method: 'GET',
-    });
+    }, true); // Requer autenticação
   }
 
   async approveCaptation(approvalData: CaptationApprovalRequest): Promise<Opportunity> {
     return this.request<Opportunity>('/api/p2p/captations/approve', {
       method: 'POST',
       body: JSON.stringify(approvalData),
-    });
+    }, true); // Requer autenticação
   }
 
   // P2P Opportunity Methods (Available investments)
@@ -433,25 +533,25 @@ class ApiService {
     const params = status ? `?status=${status}` : '';
     return this.request<OpportunityWithCompany[]>(`/api/p2p/opportunities${params}`, {
       method: 'GET',
-    });
+    }, true); // Requer autenticação
   }
 
   async getMyCompanyOpportunities(): Promise<Opportunity[]> {
     return this.request<Opportunity[]>('/api/p2p/opportunities/company', {
       method: 'GET',
-    });
+    }, true); // Requer autenticação
   }
 
   async getOpportunity(opportunityId: string): Promise<OpportunityDetail> {
     return this.request<OpportunityDetail>(`/api/p2p/opportunities/${opportunityId}`, {
       method: 'GET',
-    });
+    }, true); // Requer autenticação
   }
 
   async getOpportunityInvestments(opportunityId: string): Promise<Investment[]> {
     return this.request<Investment[]>(`/api/p2p/opportunities/${opportunityId}/investments`, {
       method: 'GET',
-    });
+    }, true); // Requer autenticação
   }
 
   // P2P Investment Methods
@@ -459,13 +559,13 @@ class ApiService {
     return this.request<Investment>('/api/p2p/investments', {
       method: 'POST',
       body: JSON.stringify(investmentData),
-    });
+    }, true); // Requer autenticação
   }
 
   async getUserPortfolio(): Promise<InvestorPortfolio> {
     return this.request<InvestorPortfolio>('/api/p2p/investments/portfolio', {
       method: 'GET',
-    });
+    }, true); // Requer autenticação
   }
 
   async getUserInvestments(): Promise<Investment[]> {
@@ -490,14 +590,14 @@ class ApiService {
   }> {
     return this.request(`/api/p2p/opportunities/${opportunityId}/user-summary`, {
       method: 'GET',
-    });
+    }, true); // Requer autenticação
   }
 
   // Company Dashboard
   async getCompanyDashboard(): Promise<CompanyDashboard> {
     return this.request<CompanyDashboard>('/api/p2p/dashboard/company', {
       method: 'GET',
-    });
+    }, true); // Requer autenticação
   }
 
   // Legacy methods for backward compatibility (to be removed after component refactoring)
@@ -507,7 +607,7 @@ class ApiService {
     return this.request<Opportunity>('/api/p2p/opportunities', {
       method: 'POST',
       body: JSON.stringify(opportunityData),
-    });
+    }, true); // Requer autenticação
   }
 
   async getMyInvestments(): Promise<Investment[]> {
@@ -521,7 +621,7 @@ class ApiService {
     console.warn('getInvestment endpoint might not exist in backend');
     return this.request<Investment>(`/api/p2p/investments/${investmentId}`, {
       method: 'GET',
-    });
+    }, true); // Requer autenticação
   }
 
   async listInvestmentsByOpportunity(opportunityId: string): Promise<Investment[]> {

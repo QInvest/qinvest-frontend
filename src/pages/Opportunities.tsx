@@ -7,6 +7,7 @@ import { CardOportunidade } from "@/components/investment/CardOportunidade";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { apiService, OpportunityWithCompany } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
+import { mockOportunidades } from "@/data/mockData";
 
 // Define the Oportunidade interface locally to match frontend expectations
 interface Oportunidade {
@@ -62,8 +63,32 @@ export default function Opportunities() {
       try {
         setLoading(true);
         setError(null);
+
+        // Fetch real opportunities from API
         const apiOpportunities = await apiService.getOpportunities();
-        setOpportunities(apiOpportunities);
+
+        // Convert mock opportunities to API format for consistency
+        const mockOpportunitiesFormatted = mockOportunidades.map(mockOpp => ({
+          opportunity_id: mockOpp.id,
+          company_name: mockOpp.nome,
+          company_cnpj: mockOpp.cnpj,
+          company_annual_revenue: mockOpp.faturamentoAnual,
+          company_sector: mockOpp.setor,
+          target_amount: mockOpp.valorCota * 200 * 100, // Convert to cents
+          quota_price: mockOpp.valorCota * 100, // Convert to cents
+          total_quotas: 200,
+          available_quotas: 200 - Math.round((mockOpp.percentualCaptacao / 100) * 200),
+          funded_amount: (mockOpp.valorCota * 200 * mockOpp.percentualCaptacao / 100) * 100, // Convert to cents
+          duration_months: mockOpp.prazo,
+          expected_return: mockOpp.retornoBruto,
+          status: 'open',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }));
+
+        // Combine API opportunities with mock opportunities
+        const allOpportunities = [...apiOpportunities, ...mockOpportunitiesFormatted];
+        setOpportunities(allOpportunities);
       } catch (error) {
         console.error('Error fetching opportunities:', error);
         setError('Erro ao carregar oportunidades');
