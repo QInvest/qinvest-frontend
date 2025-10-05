@@ -1,16 +1,87 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Loader2, AlertCircle, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CardInvestimento } from "@/components/investment/CardInvestimento";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { mockInvestimentos } from "@/data/mockData";
+import { apiService, Investment } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
-import { TrendingUp } from "lucide-react";
+
+// Define the Investimento interface locally to match frontend expectations
+interface Parcela {
+  numero: number;
+  data: string;
+  valor: number;
+  status: 'pago' | 'aguardando' | 'atrasado';
+  dataPagamento: string | null;
+}
+
+interface Investimento {
+  id: string;
+  empresaId: string;
+  foto: string;
+  nome: string;
+  risco: 'A' | 'B' | 'C' | 'D';
+  numCotas: number;
+  valorInvestido: number;
+  valorRecebido: number;
+  valorAReceber: number;
+  lucroEsperado: number;
+  vencimento: string;
+  status: 'aberto' | 'finalizado' | 'analise';
+  parcelas: Parcela[];
+}
+
+// Transform API Investment to frontend Investimento interface
+const transformInvestment = (investment: Investment): Investimento => {
+  return {
+    id: investment.investment_id,
+    empresaId: investment.opportunity_id,
+    foto: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=300&fit=crop", // Default image
+    nome: `Investimento ${investment.investment_id.slice(-4)}`, // Will need opportunity/company name
+    risco: 'A', // This would need to come from opportunity
+    numCotas: investment.quotas_purchased,
+    valorInvestido: investment.investment_amount / 100, // Convert from cents
+    valorRecebido: 0, // This would need to be calculated from returns
+    valorAReceber: investment.investment_amount / 100, // Initial placeholder
+    lucroEsperado: 0, // This would need to be calculated
+    vencimento: investment.created_at, // Placeholder
+    status: investment.status === 'confirmed' ? 'aberto' : investment.status === 'cancelled' ? 'finalizado' : 'analise',
+    parcelas: [] // Would need to come from returns/payments
+  };
+};
 
 export default function MeusInvestimentos() {
   const { toast } = useToast();
+  const [investments, setInvestments] = useState<Investment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedInvestimento, setSelectedInvestimento] = useState<string | null>(null);
   const [showVenderDialog, setShowVenderDialog] = useState(false);
+
+  // Fetch user investments
+  useEffect(() => {
+    const fetchInvestments = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const userInvestments = await apiService.getUserInvestments();
+        setInvestments(userInvestments);
+      } catch (error) {
+        console.error('Error fetching investments:', error);
+        setError('Erro ao carregar investimentos');
+        toast({
+          title: "Erro ao carregar investimentos",
+          description: "Não foi possível carregar os investimentos. Tente novamente.",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInvestments();
+  }, [toast]);
 
   const handleVenderClick = (id: string) => {
     setSelectedInvestimento(id);
@@ -26,11 +97,29 @@ export default function MeusInvestimentos() {
     setSelectedInvestimento(null);
   };
 
-  const investimentoSelecionado = mockInvestimentos.find(inv => inv.id === selectedInvestimento);
+  // Transform API investments to frontend format
+  const investimentosData = investments.map(transformInvestment);
+
+  const investimentoSelecionado = investimentosData.find(inv => inv.id === selectedInvestimento);
   const taxaAdmin = 0.02;
   const valorAReceber = investimentoSelecionado 
     ? investimentoSelecionado.valorAReceber * (1 - taxaAdmin)
     : 0;
+
+  if (loading) {
+    return (
+      <DashboardLayout title="Meus Investimentos">
+        <div className="p-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-center min-h-[400px]">
+              <Loader2 className="h-8 w-8 animate-spin" />
+              <span className="ml-2">Carregando investimentos...</span>
+            </div>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout title="Meus Investimentos">
@@ -44,7 +133,7 @@ export default function MeusInvestimentos() {
                 <p className="text-sm text-muted-foreground">Total Investido</p>
               </div>
               <p className="text-3xl font-bold">
-                R$ {mockInvestimentos.reduce((acc, inv) => acc + inv.valorInvestido, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                R$ {investimentosData.reduce((acc, inv) => acc + inv.valorInvestido, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </p>
             </div>
 
@@ -54,7 +143,7 @@ export default function MeusInvestimentos() {
                 <p className="text-sm text-muted-foreground">Total Recebido</p>
               </div>
               <p className="text-3xl font-bold text-success">
-                R$ {mockInvestimentos.reduce((acc, inv) => acc + inv.valorRecebido, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                R$ {investimentosData.reduce((acc, inv) => acc + inv.valorRecebido, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </p>
             </div>
 
@@ -64,20 +153,32 @@ export default function MeusInvestimentos() {
                 <p className="text-sm text-muted-foreground">Investimentos Ativos</p>
               </div>
               <p className="text-3xl font-bold">
-                {mockInvestimentos.filter(inv => inv.status === 'aberto').length}
+                {investimentosData.filter(inv => inv.status === 'aberto').length}
               </p>
             </div>
           </div>
 
           {/* Investments List */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {mockInvestimentos.map((investimento) => (
-              <CardInvestimento
-                key={investimento.id}
-                investimento={investimento}
-                onVenderClick={handleVenderClick}
-              />
-            ))}
+            {investimentosData.length > 0 ? (
+              investimentosData.map((investimento) => (
+                <CardInvestimento
+                  key={investimento.id}
+                  investimento={investimento}
+                  onVenderClick={handleVenderClick}
+                />
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12">
+                <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-muted-foreground mb-2">
+                  Nenhum investimento encontrado
+                </h3>
+                <p className="text-muted-foreground">
+                  Você ainda não fez nenhum investimento. Explore as oportunidades disponíveis.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

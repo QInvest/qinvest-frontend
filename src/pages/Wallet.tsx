@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { CreditCard, Download, Upload, History, PiggyBank } from "lucide-react";
+import { useState, useEffect } from "react";
+import { CreditCard, Download, Upload, History, PiggyBank, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,61 +8,213 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { useWallet } from "@/hooks/useWallet";
+import { apiService, TransactionData } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 
 const Wallet = () => {
   const { toast } = useToast();
-  const [balance] = useState(25000);
+  const { carteira, walletData, loading, error, refreshWallet } = useWallet();
+  const [transactions, setTransactions] = useState<TransactionData[]>([]);
+  const [loadingTransactions, setLoadingTransactions] = useState(false);
   const [showDepositDialog, setShowDepositDialog] = useState(false);
   const [showWithdrawDialog, setShowWithdrawDialog] = useState(false);
+  const [depositAmount, setDepositAmount] = useState("");
+  const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [isProcessingDeposit, setIsProcessingDeposit] = useState(false);
+  const [isProcessingWithdraw, setIsProcessingWithdraw] = useState(false);
 
-  const transactions = [
-    { id: 1, type: "deposit", amount: 5000, date: "2024-01-15", description: "Depósito via PIX", status: "completed" },
-    { id: 2, type: "investment", amount: -2000, date: "2024-01-12", description: "Investimento - TechSolutions", status: "completed" },
-    { id: 3, type: "return", amount: 350, date: "2024-01-10", description: "Retorno - EcoEnergy", status: "completed" },
-    { id: 4, type: "deposit", amount: 10000, date: "2024-01-08", description: "Depósito via TED", status: "completed" },
-    { id: 5, type: "investment", amount: -5000, date: "2024-01-05", description: "Investimento - AgriTech", status: "completed" },
-    { id: 6, type: "withdraw", amount: -1500, date: "2024-01-03", description: "Saque via PIX", status: "completed" },
-  ];
+  // Fetch transactions when wallet data is available
+  useEffect(() => {
+    refreshTransactions();
+  }, [walletData?.wallet_id]);
 
-  const handleDeposit = () => {
-    toast({
-      title: "Depósito solicitado!",
-      description: "Você receberá as instruções por email.",
-    });
-    setShowDepositDialog(false);
+  const refreshTransactions = async () => {
+    if (!walletData?.wallet_id) return;
+    
+    setLoadingTransactions(true);
+    try {
+      const fetchedTransactions = await apiService.fetchTransactions();
+      setTransactions(fetchedTransactions);
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+      toast({
+        title: "Erro ao carregar histórico",
+        description: "Não foi possível carregar o histórico de transações.",
+        variant: "destructive",
+      });
+      // Set empty array on error instead of keeping old data
+      setTransactions([]);
+    } finally {
+      setLoadingTransactions(false);
+    }
   };
 
-  const handleWithdraw = () => {
-    toast({
-      title: "Saque solicitado!",
-      description: "O valor será transferido em até 1 dia útil.",
-    });
-    setShowWithdrawDialog(false);
+  const handleDeposit = async () => {
+    if (!carteira || !walletData || !depositAmount) {
+      toast({
+        title: "Erro",
+        description: "Por favor, insira um valor válido para o depósito.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const amount = parseFloat(depositAmount.replace(",", "."));
+    if (isNaN(amount) || amount <= 0) {
+      toast({
+        title: "Erro",
+        description: "Por favor, insira um valor válido maior que zero.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsProcessingDeposit(true);
+
+    try {
+      const amountInCents = Math.round(amount * 100);
+
+      await apiService.createTransaction({
+        wallet_id: walletData.wallet_id,
+        amount: amountInCents,
+        type: "credit",
+        status: "completed"
+      });
+
+      toast({
+        title: "Depósito realizado!",
+        description: `Depósito de R$ ${amount.toFixed(2)} realizado com sucesso.`,
+      });
+
+      setDepositAmount("");
+      setShowDepositDialog(false);
+      refreshWallet();
+      refreshTransactions();
+    } catch (error) {
+      toast({
+        title: "Erro no depósito",
+        description: "Não foi possível realizar o depósito. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessingDeposit(false);
+    }
   };
 
-  const getTransactionIcon = (type: string) => {
+  const handleWithdraw = async () => {
+    if (!carteira || !walletData || !withdrawAmount) {
+      toast({
+        title: "Erro",
+        description: "Por favor, insira um valor válido para o saque.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const amount = parseFloat(withdrawAmount.replace(",", "."));
+    if (isNaN(amount) || amount <= 0) {
+      toast({
+        title: "Erro",
+        description: "Por favor, insira um valor válido maior que zero.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (amount > carteira.saldoDisponivel) {
+      toast({
+        title: "Saldo insuficiente",
+        description: "O valor do saque é maior que o saldo disponível.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsProcessingWithdraw(true);
+
+    try {
+      const amountInCents = Math.round(amount * 100);
+
+      await apiService.createTransaction({
+        wallet_id: walletData.wallet_id,
+        amount: amountInCents,
+        type: "debit",
+        status: "completed"
+      });
+
+      toast({
+        title: "Saque realizado!",
+        description: `Saque de R$ ${amount.toFixed(2)} realizado com sucesso.`,
+      });
+
+      setWithdrawAmount("");
+      setShowWithdrawDialog(false);
+      refreshWallet();
+      refreshTransactions();
+    } catch (error) {
+      toast({
+        title: "Erro no saque",
+        description: "Não foi possível realizar o saque. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessingWithdraw(false);
+    }
+  };
+
+  const getTransactionIcon = (type: 'credit' | 'debit') => {
     switch (type) {
-      case "deposit": return <Upload className="h-4 w-4 text-green-600" />;
-      case "withdraw": return <Download className="h-4 w-4 text-red-600" />;
-      case "investment": return <PiggyBank className="h-4 w-4 text-blue-600" />;
-      case "return": return <CreditCard className="h-4 w-4 text-green-600" />;
+      case "credit": return <Upload className="h-4 w-4 text-green-600" />;
+      case "debit": return <Download className="h-4 w-4 text-red-600" />;
       default: return <History className="h-4 w-4" />;
     }
   };
 
-  const getTransactionColor = (type: string) => {
+  const getTransactionColor = (type: 'credit' | 'debit') => {
     switch (type) {
-      case "deposit":
-      case "return":
+      case "credit":
         return "text-green-600";
-      case "withdraw":
-      case "investment":
+      case "debit":
         return "text-red-600";
       default:
         return "text-foreground";
     }
   };
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <span className="ml-2">Carregando carteira...</span>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <AlertCircle className="h-8 w-8 text-red-500" />
+          <span className="ml-2">Erro ao carregar carteira: {error}</span>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (!carteira || !walletData) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <span>Nenhuma carteira encontrada</span>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  const balance = carteira?.saldoDisponivel || 0;
 
   return (
     <DashboardLayout title="Carteira Virtual">
@@ -169,26 +321,45 @@ const Wallet = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {transactions.map((transaction) => (
-                    <TableRow key={transaction.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {getTransactionIcon(transaction.type)}
-                          <span className="capitalize">{transaction.type}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-medium">{transaction.description}</TableCell>
-                      <TableCell>{new Date(transaction.date).toLocaleDateString('pt-BR')}</TableCell>
-                      <TableCell className={`font-medium ${getTransactionColor(transaction.type)}`}>
-                        {transaction.amount > 0 ? '+' : ''}R$ {Math.abs(transaction.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">
-                          Concluído
-                        </Badge>
+                  {loadingTransactions ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8">
+                        <Loader2 className="h-4 w-4 animate-spin mx-auto" />
+                        <span className="ml-2">Carregando transações...</span>
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : transactions.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                        Nenhuma transação encontrada
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    transactions.map((transaction) => (
+                      <TableRow key={transaction.transaction_id}>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            {getTransactionIcon(transaction.type)}
+                            <span className="capitalize">
+                              {transaction.type === 'credit' ? 'Depósito' : 'Saque'}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {transaction.type === 'credit' ? 'Depósito na carteira' : 'Saque da carteira'}
+                        </TableCell>
+                        <TableCell>{new Date(transaction.created_at).toLocaleDateString('pt-BR')}</TableCell>
+                        <TableCell className={`font-medium ${getTransactionColor(transaction.type)}`}>
+                          {transaction.type === 'credit' ? '+' : '-'}R$ {(transaction.amount / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={transaction.status === 'completed' ? 'default' : 'secondary'}>
+                            {transaction.status === 'completed' ? 'Concluído' : transaction.status}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </CardContent>

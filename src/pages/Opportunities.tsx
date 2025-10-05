@@ -1,19 +1,90 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SearchBar } from "@/components/investment/SearchBar";
 import { FiltersPanel } from "@/components/investment/FiltersPanel";
 import { CardOportunidade } from "@/components/investment/CardOportunidade";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { mockOportunidades } from "@/data/mockData";
+import { apiService, OpportunityWithCompany } from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
+
+// Define the Oportunidade interface locally to match frontend expectations
+interface Oportunidade {
+  id: string;
+  foto: string;
+  nome: string;
+  risco: 'A' | 'B' | 'C' | 'D';
+  retornoBruto: number;
+  prazo: number;
+  percentualCaptacao: number;
+  valorCota: number;
+  cnpj: string;
+  faturamentoAnual: number;
+  setor: string;
+  site: string | null;
+  garantia: string;
+  capitalSocial: number;
+}
+
+// Transform API OpportunityWithCompany to frontend Oportunidade interface
+const transformOpportunity = (opportunity: OpportunityWithCompany): Oportunidade => {
+  return {
+    id: opportunity.opportunity_id,
+    foto: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=300&fit=crop",
+    nome: opportunity.company_name,
+    risco: 'A', // This would need to come from risk assessment
+    retornoBruto: opportunity.expected_return,
+    prazo: opportunity.duration_months,
+    percentualCaptacao: Math.round((opportunity.funded_amount / opportunity.target_amount) * 100),
+    valorCota: opportunity.quota_price / 100, // Convert from cents
+    cnpj: opportunity.company_cnpj,
+    faturamentoAnual: opportunity.company_annual_revenue || 0,
+    setor: opportunity.company_sector || "Não informado",
+    site: null,
+    garantia: "A definir",
+    capitalSocial: opportunity.target_amount / 100 // Convert from cents
+  };
+};
 
 export default function Opportunities() {
+  const { toast } = useToast();
+  const [opportunities, setOpportunities] = useState<OpportunityWithCompany[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRiscos, setSelectedRiscos] = useState<string[]>([]);
   const [tempoRange, setTempoRange] = useState<[number, number]>([6, 36]);
   const [captacaoRange, setCaptacaoRange] = useState<[number, number]>([0, 100]);
 
+  // Fetch opportunities on component mount
+  useEffect(() => {
+    const fetchOpportunities = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const apiOpportunities = await apiService.getOpportunities();
+        setOpportunities(apiOpportunities);
+      } catch (error) {
+        console.error('Error fetching opportunities:', error);
+        setError('Erro ao carregar oportunidades');
+        toast({
+          title: "Erro ao carregar oportunidades",
+          description: "Não foi possível carregar as oportunidades. Tente novamente.",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOpportunities();
+  }, [toast]);
+
+  // Transform API opportunities to frontend format
+  const oportunidadesData = opportunities.map(transformOpportunity);
+
   // Filter opportunities
-  const filteredOportunidades = mockOportunidades.filter(opp => {
+  const filteredOportunidades = oportunidadesData.filter(opp => {
     const matchesSearch = opp.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          opp.setor.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRisco = selectedRiscos.length === 0 || selectedRiscos.includes(opp.risco);
@@ -24,10 +95,35 @@ export default function Opportunities() {
     return matchesSearch && matchesRisco && matchesTempo && matchesCaptacao;
   });
 
+  if (loading) {
+    return (
+      <DashboardLayout title="Oportunidades de Investimento">
+        <div className="p-4 sm:p-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-center min-h-[400px]">
+              <Loader2 className="h-8 w-8 animate-spin" />
+              <span className="ml-2">Carregando oportunidades...</span>
+            </div>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout title="Oportunidades de Investimento">
       <div className="p-4 sm:p-6">
         <div className="max-w-7xl mx-auto">
+          {/* Header without Create Opportunity Button */}
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-bold">Oportunidades de Investimento</h2>
+              <p className="text-muted-foreground">
+                Descubra oportunidades de investimento aprovadas automaticamente
+              </p>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
             {/* Filters Sidebar */}
             <div className="hidden lg:block">
@@ -61,10 +157,10 @@ export default function Opportunities() {
 
               {/* Results Count */}
               <div className="text-sm text-muted-foreground">
-                {filteredOportunidades.length === mockOportunidades.length ? (
+                {filteredOportunidades.length === oportunidadesData.length ? (
                   `Mostrando todas as ${filteredOportunidades.length} oportunidades`
                 ) : (
-                  `${filteredOportunidades.length} de ${mockOportunidades.length} oportunidades encontradas`
+                  `${filteredOportunidades.length} de ${oportunidadesData.length} oportunidades encontradas`
                 )}
               </div>
 
@@ -105,7 +201,7 @@ export default function Opportunities() {
               )}
 
               {/* Load More */}
-              {filteredOportunidades.length > 0 && filteredOportunidades.length < mockOportunidades.length && (
+              {filteredOportunidades.length > 0 && filteredOportunidades.length < oportunidadesData.length && (
                 <div className="text-center pt-6">
                   <Button variant="outline" size="lg">
                     Carregar mais oportunidades

@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { Building2, Plus } from 'lucide-react';
+import { Building2, Plus, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useCompany, Company } from '@/contexts/CompanyContext';
+import { apiService, Company } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 
 interface AddCompanyDialogProps {
@@ -13,24 +13,25 @@ interface AddCompanyDialogProps {
 }
 
 export function AddCompanyDialog({ onCompanyAdded }: AddCompanyDialogProps) {
-  const { addCompany } = useCompany();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState({
     cnpj: '',
-    companyName: '',
-    sector: '',
-    revenue: '',
+    company_name: '',
+    cnae_primary: '',
+    cnae_secondary: '',
+    annual_revenue: '',
+    employees_count: '',
+    founded_date: '',
     address: '',
     city: '',
     state: '',
     phone: '',
     zipcode: '',
-    businessSector: '',
-    foundedDate: '',
-    employeesCount: ''
+    status: 'active',
+    business_sector: ''
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -42,54 +43,58 @@ export function AddCompanyDialog({ onCompanyAdded }: AddCompanyDialogProps) {
     setIsSubmitting(true);
 
     try {
-      const newCompany = {
+      const companyData = {
         cnpj: formData.cnpj,
-        companyName: formData.companyName,
-        sector: formData.sector,
-        revenue: formData.revenue,
+        company_name: formData.company_name,
+        cnae_primary: formData.cnae_primary,
+        cnae_secondary: formData.cnae_secondary || undefined,
+        annual_revenue: parseFloat(formData.annual_revenue.replace(/[^\d.,]/g, '').replace(',', '.')) || 0,
+        employees_count: parseInt(formData.employees_count) || 0,
+        founded_date: formData.founded_date,
         address: formData.address,
         city: formData.city,
         state: formData.state,
         phone: formData.phone,
         zipcode: formData.zipcode,
-        businessSector: formData.businessSector,
-        foundedDate: formData.foundedDate,
-        employeesCount: parseInt(formData.employeesCount) || 0
+        status: formData.status,
+        business_sector: formData.business_sector || undefined
       };
 
-      addCompany(newCompany);
+      const newCompany = await apiService.createCompany(companyData);
       
       toast({
-        title: "Empresa adicionada!",
-        description: `${formData.companyName} foi adicionada com sucesso.`,
+        title: "Empresa criada!",
+        description: `${formData.company_name} foi criada com sucesso.`,
       });
 
       // Reset form
       setFormData({
         cnpj: '',
-        companyName: '',
-        sector: '',
-        revenue: '',
+        company_name: '',
+        cnae_primary: '',
+        cnae_secondary: '',
+        annual_revenue: '',
+        employees_count: '',
+        founded_date: '',
         address: '',
         city: '',
         state: '',
         phone: '',
         zipcode: '',
-        businessSector: '',
-        foundedDate: '',
-        employeesCount: ''
+        status: 'active',
+        business_sector: ''
       });
 
       setOpen(false);
       
       if (onCompanyAdded) {
-        const addedCompany = { ...newCompany, id: Date.now().toString() };
-        onCompanyAdded(addedCompany as Company);
+        onCompanyAdded(newCompany);
       }
     } catch (error) {
+      console.error('Error creating company:', error);
       toast({
-        title: "Erro",
-        description: "Ocorreu um erro ao adicionar a empresa.",
+        title: "Erro ao criar empresa",
+        description: "Não foi possível criar a empresa. Verifique os dados e tente novamente.",
         variant: "destructive"
       });
     } finally {
@@ -133,52 +138,99 @@ export function AddCompanyDialog({ onCompanyAdded }: AddCompanyDialogProps) {
 
             {/* Company Name */}
             <div className="space-y-2">
-              <Label htmlFor="companyName">Nome da Empresa *</Label>
+              <Label htmlFor="company_name">Nome da Empresa *</Label>
               <Input
-                id="companyName"
+                id="company_name"
                 placeholder="Nome da empresa"
-                value={formData.companyName}
-                onChange={(e) => handleInputChange("companyName", e.target.value)}
+                value={formData.company_name}
+                onChange={(e) => handleInputChange("company_name", e.target.value)}
                 required
                 disabled={isSubmitting}
               />
             </div>
 
-            {/* Sector */}
+            {/* CNAE Primary */}
             <div className="space-y-2">
-              <Label htmlFor="sector">Setor de Atuação *</Label>
+              <Label htmlFor="cnae_primary">CNAE Principal *</Label>
+              <Input
+                id="cnae_primary"
+                placeholder="Ex: 6201-5/00"
+                value={formData.cnae_primary}
+                onChange={(e) => handleInputChange("cnae_primary", e.target.value)}
+                required
+                disabled={isSubmitting}
+              />
+            </div>
+
+            {/* CNAE Secondary */}
+            <div className="space-y-2">
+              <Label htmlFor="cnae_secondary">CNAE Secundário</Label>
+              <Input
+                id="cnae_secondary"
+                placeholder="Ex: 6209-1/00"
+                value={formData.cnae_secondary}
+                onChange={(e) => handleInputChange("cnae_secondary", e.target.value)}
+                disabled={isSubmitting}
+              />
+            </div>
+
+            {/* Annual Revenue */}
+            <div className="space-y-2">
+              <Label htmlFor="annual_revenue">Faturamento Anual *</Label>
+              <Input
+                id="annual_revenue"
+                placeholder="R$ 0,00"
+                value={formData.annual_revenue}
+                onChange={(e) => handleInputChange("annual_revenue", e.target.value)}
+                required
+                disabled={isSubmitting}
+              />
+            </div>
+
+            {/* Employees Count */}
+            <div className="space-y-2">
+              <Label htmlFor="employees_count">Número de Funcionários *</Label>
+              <Input
+                id="employees_count"
+                type="number"
+                placeholder="0"
+                value={formData.employees_count}
+                onChange={(e) => handleInputChange("employees_count", e.target.value)}
+                required
+                disabled={isSubmitting}
+              />
+            </div>
+
+            {/* Founded Date */}
+            <div className="space-y-2">
+              <Label htmlFor="founded_date">Data de Fundação *</Label>
+              <Input
+                id="founded_date"
+                type="date"
+                value={formData.founded_date}
+                onChange={(e) => handleInputChange("founded_date", e.target.value)}
+                required
+                disabled={isSubmitting}
+              />
+            </div>
+
+            {/* Status */}
+            <div className="space-y-2">
+              <Label htmlFor="status">Status *</Label>
               <Select
-                value={formData.sector}
-                onValueChange={(value) => handleInputChange("sector", value)}
+                value={formData.status}
+                onValueChange={(value) => handleInputChange("status", value)}
                 disabled={isSubmitting}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione o setor" />
+                  <SelectValue placeholder="Selecione o status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="technology">Tecnologia</SelectItem>
-                  <SelectItem value="agriculture">Agronegócio</SelectItem>
-                  <SelectItem value="retail">Varejo</SelectItem>
-                  <SelectItem value="manufacturing">Indústria</SelectItem>
-                  <SelectItem value="services">Serviços</SelectItem>
-                  <SelectItem value="healthcare">Saúde</SelectItem>
-                  <SelectItem value="education">Educação</SelectItem>
-                  <SelectItem value="other">Outro</SelectItem>
+                  <SelectItem value="active">Ativa</SelectItem>
+                  <SelectItem value="inactive">Inativa</SelectItem>
+                  <SelectItem value="suspended">Suspensa</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-
-            {/* Revenue */}
-            <div className="space-y-2">
-              <Label htmlFor="revenue">Faturamento Mensal *</Label>
-              <Input
-                id="revenue"
-                placeholder="R$ 0,00"
-                value={formData.revenue}
-                onChange={(e) => handleInputChange("revenue", e.target.value)}
-                required
-                disabled={isSubmitting}
-              />
             </div>
 
             {/* Address */}
@@ -248,39 +300,12 @@ export function AddCompanyDialog({ onCompanyAdded }: AddCompanyDialogProps) {
 
             {/* Business Sector */}
             <div className="space-y-2">
-              <Label htmlFor="businessSector">Ramo de Negócio</Label>
+              <Label htmlFor="business_sector">Setor de Negócio</Label>
               <Input
-                id="businessSector"
+                id="business_sector"
                 placeholder="Ex: Desenvolvimento de Software"
-                value={formData.businessSector}
-                onChange={(e) => handleInputChange("businessSector", e.target.value)}
-                disabled={isSubmitting}
-              />
-            </div>
-
-            {/* Founded Date */}
-            <div className="space-y-2">
-              <Label htmlFor="foundedDate">Data de Fundação *</Label>
-              <Input
-                id="foundedDate"
-                type="date"
-                value={formData.foundedDate}
-                onChange={(e) => handleInputChange("foundedDate", e.target.value)}
-                required
-                disabled={isSubmitting}
-              />
-            </div>
-
-            {/* Employees Count */}
-            <div className="space-y-2">
-              <Label htmlFor="employeesCount">Número de Funcionários *</Label>
-              <Input
-                id="employeesCount"
-                type="number"
-                placeholder="0"
-                value={formData.employeesCount}
-                onChange={(e) => handleInputChange("employeesCount", e.target.value)}
-                required
+                value={formData.business_sector}
+                onChange={(e) => handleInputChange("business_sector", e.target.value)}
                 disabled={isSubmitting}
               />
             </div>
@@ -304,13 +329,13 @@ export function AddCompanyDialog({ onCompanyAdded }: AddCompanyDialogProps) {
             >
               {isSubmitting ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Adicionando...
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Criando empresa...
                 </>
               ) : (
                 <>
                   <Plus className="h-4 w-4 mr-2" />
-                  Adicionar Empresa
+                  Criar Empresa
                 </>
               )}
             </Button>

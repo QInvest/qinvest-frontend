@@ -1,3 +1,5 @@
+import { WalletData, TransactionData } from '../services/api';
+
 // Mock Data para Qi Tech Platform
 
 export interface Oportunidade {
@@ -74,60 +76,40 @@ export interface Carteira {
   graficoPatrimonio: Array<{ mes: string; valor: number }>;
 }
 
-// Mock Data
-export const mockCarteira: Carteira = {
-  saldoDisponivel: 25347.89,
-  patrimonioInvestido: 50000.0,
-  lucroHistorico: 3234.56,
-  extrato: [
-    {
-      id: "txn-001",
-      data: "2025-03-12T10:30:00Z",
-      tipo: "deposito",
-      valor: 1000.0,
-      status: "concluido",
-      descricao: "Depósito via PIX"
-    },
-    {
-      id: "txn-002",
-      data: "2025-03-10T15:45:00Z",
-      tipo: "lucro",
-      valor: 234.5,
-      status: "concluido",
-      descricao: "Lucro - TechCorp S.A."
-    },
-    {
-      id: "txn-003",
-      data: "2025-03-08T09:00:00Z",
-      tipo: "investimento",
-      valor: -5000.0,
-      status: "concluido",
-      descricao: "Investimento - TechCorp S.A."
-    },
-    {
-      id: "txn-004",
-      data: "2025-03-05T14:20:00Z",
-      tipo: "deposito",
-      valor: 10000.0,
-      status: "concluido",
-      descricao: "Depósito via TED"
-    },
-    {
-      id: "txn-005",
-      data: "2025-03-01T11:30:00Z",
-      tipo: "lucro",
-      valor: 187.25,
-      status: "concluido",
-      descricao: "Lucro - Food Express S.A."
-    }
-  ],
-  graficoPatrimonio: [
-    { mes: "Jan", valor: 45000 },
-    { mes: "Fev", valor: 48000 },
-    { mes: "Mar", valor: 53235 }
-  ]
+// Transform API data to match your frontend interface
+export const transformWalletData = (walletData: WalletData, transactions: TransactionData[]): Carteira => {
+  const extrato: Transacao[] = transactions.map(transaction => ({
+    id: transaction.transaction_id,
+    data: transaction.created_at,
+    tipo: transaction.type === 'credit' ? 'deposito' : 'saque',
+    valor: transaction.type === 'credit' ? transaction.amount : -transaction.amount,
+    status: transaction.status === 'completed' ? 'concluido' : 'pendente',
+    descricao: `${transaction.type === 'credit' ? 'Depósito' : 'Saque'} - ${transaction.amount / 100} ${walletData.currency}`
+  }));
+
+  // Calculate patrimonio and lucro from transactions
+  const totalDeposits = transactions
+    .filter(t => t.type === 'credit')
+    .reduce((sum, t) => sum + t.amount, 0);
+  
+  const totalWithdrawals = transactions
+    .filter(t => t.type === 'debit')
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  return {
+    saldoDisponivel: walletData.balance / 100, // Convert from cents
+    patrimonioInvestido: totalDeposits / 100, // Convert from cents
+    lucroHistorico: (totalDeposits - totalWithdrawals - walletData.balance) / 100,
+    extrato,
+    graficoPatrimonio: [
+      { mes: "Jan", valor: 45000 },
+      { mes: "Fev", valor: 48000 },
+      { mes: "Mar", valor: walletData.balance / 100 }
+    ]
+  };
 };
 
+// Mock Data
 export const mockOportunidades: Oportunidade[] = [
   {
     id: "opp-001",

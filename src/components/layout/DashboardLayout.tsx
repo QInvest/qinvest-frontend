@@ -13,9 +13,10 @@ import {
   Eye,
   AlertCircle,
   Menu,
-  LogOut
+  LogOut,
+  Loader2
 } from "lucide-react";
-import { mockCarteira } from "@/data/mockData";
+import { useWallet } from "@/hooks/useWallet";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface DashboardLayoutProps {
@@ -28,6 +29,7 @@ export function DashboardLayout({ children, title, showBalance = true }: Dashboa
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, user } = useAuth();
+  const { carteira, loading, error } = useWallet();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -104,6 +106,53 @@ export function DashboardLayout({ children, title, showBalance = true }: Dashboa
     </nav>
   );
 
+  // Function to render balance display
+  const renderBalance = () => {
+    if (!showBalance) return null;
+
+    if (loading) {
+      return (
+        <div className="text-right hidden sm:block">
+          <div className="text-sm text-muted-foreground">Saldo disponível</div>
+          <div className="flex items-center space-x-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span className="text-sm text-muted-foreground">Carregando...</span>
+          </div>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="text-right hidden sm:block">
+          <div className="text-sm text-muted-foreground">Saldo disponível</div>
+          <div className="flex items-center space-x-1 text-destructive">
+            <AlertCircle className="h-4 w-4" />
+            <span className="text-sm">Erro</span>
+          </div>
+        </div>
+      );
+    }
+
+    if (!carteira) {
+      return (
+        <div className="text-right hidden sm:block">
+          <div className="text-sm text-muted-foreground">Saldo disponível</div>
+          <div className="text-sm text-muted-foreground">--</div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="text-right hidden sm:block">
+        <div className="text-sm text-muted-foreground">Saldo disponível</div>
+        <div className="text-xl sm:text-2xl font-bold text-success">
+          R$ {carteira.saldoDisponivel.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-muted/30 font-inter">
       {/* Header */}
@@ -135,14 +184,7 @@ export function DashboardLayout({ children, title, showBalance = true }: Dashboa
           </div>
 
           <div className="flex items-center space-x-2 sm:space-x-4">
-            {showBalance && (
-              <div className="text-right hidden sm:block">
-                <div className="text-sm text-muted-foreground">Saldo disponível</div>
-                <div className="text-xl sm:text-2xl font-bold text-success">
-                  R$ {mockCarteira.saldoDisponivel.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </div>
-              </div>
-            )}
+            {renderBalance()}
             
             {/* User Info */}
             {user && (

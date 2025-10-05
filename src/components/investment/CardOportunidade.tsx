@@ -4,7 +4,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import type { Oportunidade } from "@/data/mockData";
+import { InvestmentDialog } from "./InvestmentDialog";
+
+// Define the Oportunidade interface locally
+interface Oportunidade {
+  id: string;
+  foto: string;
+  nome: string;
+  risco: 'A' | 'B' | 'C' | 'D';
+  retornoBruto: number;
+  prazo: number;
+  percentualCaptacao: number;
+  valorCota: number;
+  cnpj: string;
+  faturamentoAnual: number;
+  setor: string;
+  site: string | null;
+  garantia: string;
+  capitalSocial: number;
+}
 
 interface CardOportunidadeProps {
   oportunidade: Oportunidade;
@@ -159,15 +177,19 @@ export function CardOportunidade({ oportunidade, variant = 'expanded' }: CardOpo
           </div>
         </div>
 
-        {/* Action Button */}
-        <Button 
-          className="w-full gradient-primary text-white" 
-          asChild
-        >
-          <Link to={`/company/${oportunidade.id}`}>
-            Mais Detalhes
-          </Link>
-        </Button>
+        {/* Action Buttons */}
+        <div className="space-y-2">
+          <InvestmentDialog oportunidade={oportunidade} />
+          <Button 
+            variant="outline" 
+            className="w-full" 
+            asChild
+          >
+            <Link to={`/company/${oportunidade.id}`}>
+              Mais Detalhes
+            </Link>
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

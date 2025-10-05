@@ -2,7 +2,31 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import type { Investimento } from "@/data/mockData";
+
+// Define the Investimento interface locally
+interface Parcela {
+  numero: number;
+  data: string;
+  valor: number;
+  status: 'pago' | 'aguardando' | 'atrasado';
+  dataPagamento: string | null;
+}
+
+interface Investimento {
+  id: string;
+  empresaId: string;
+  foto: string;
+  nome: string;
+  risco: 'A' | 'B' | 'C' | 'D';
+  numCotas: number;
+  valorInvestido: number;
+  valorRecebido: number;
+  valorAReceber: number;
+  lucroEsperado: number;
+  vencimento: string;
+  status: 'aberto' | 'finalizado' | 'analise';
+  parcelas: Parcela[];
+}
 
 interface CardInvestimentoProps {
   investimento: Investimento;
